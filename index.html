@@ -14,8 +14,7 @@
 <style>
 :root {
   --bg: #3C3F4F;
-  --field: #4F5260;
-  --field-active: #ffffff;
+  --field-active: rgba(255,255,255,0.06);
   --equal: #cfd6df;
   --equal-active: #b6d46a;
   --key-bg: #616161;
@@ -64,18 +63,17 @@ body {
 }
 
 .field {
-  height: 69px;
-  background: var(--field);
+  height: 96px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 22px;
+  font-size: 66px;
+  font-weight: 400;
   cursor: pointer;
 }
 
 .field.active {
   background: var(--field-active);
-  color: #000;
 }
 
 .field.inactive {
