@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<g id="Sfondi">
+<rect id="Sfondo_tastiera" x="0" y="0" width="390" height="844" fill="#F2FBE3"/>
+<rect id="Sfondo_campi" x="0" y="0" width="390" height="438" fill="#4D4DFF"/>
+</g>
+<g id="Proporzione">
+<rect id="Campo_attivo" x="213" y="149" width="161" height="58" rx="29" fill="#E6FC9C"/>
+<rect id="Barra_sinistra" x="16" y="218" width="161" height="2" fill="#E6FC9C"/>
+<rect id="Barra_destra" x="213" y="218" width="161" height="2" fill="#E6FC9C"/>
+<text id="Segno_uguale" x="195" y="227" font-family="Inter-Light, Inter" font-weight="300" font-size="32" fill="#E6FC9C" text-anchor="middle">=</text>
+<text id="Numero_a" x="96.5" y="195.47" font-family="Inter-Light, Inter" font-weight="300" font-size="48" fill="#F2FBE3" text-anchor="middle">1250,5</text>
+<text id="Numero_c" x="293.5" y="195.47" font-family="Inter-Light, Inter" font-weight="300" font-size="48" fill="#111111" text-anchor="middle">12,8</text>
+<text id="Numero_b" x="96.5" y="277.47" font-family="Inter-Light, Inter" font-weight="300" font-size="48" fill="#F2FBE3" text-anchor="middle">3,75</text>
+</g>
+<g id="Tastiera">
+<g id="Tasto_7"><rect x="16" y="462" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_7_testo" x="55.5" y="514.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">7</text></g>
+<g id="Tasto_8"><rect x="109" y="462" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_8_testo" x="148.5" y="514.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">8</text></g>
+<g id="Tasto_9"><rect x="202" y="462" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_9_testo" x="241.5" y="514.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">9</text></g>
+<g id="Tasto_C"><rect x="295" y="462" width="79" height="79" rx="39.5" fill="#FF2BD6"/><text id="Tasto_C_testo" x="334.5" y="514.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#FFFFFF" text-anchor="middle">C</text></g>
+<g id="Tasto_4"><rect x="16" y="555" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_4_testo" x="55.5" y="607.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">4</text></g>
+<g id="Tasto_5"><rect x="109" y="555" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_5_testo" x="148.5" y="607.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">5</text></g>
+<g id="Tasto_6"><rect x="202" y="555" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_6_testo" x="241.5" y="607.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">6</text></g>
+<g id="Tasto_DEL"><rect x="295" y="555" width="79" height="79" rx="39.5" fill="#FF6B35"/><text id="Tasto_DEL_testo" x="334.5" y="603.13" font-family="Inter-Light, Inter" font-weight="300" font-size="23.7" fill="#FFFFFF" text-anchor="middle">DEL</text></g>
+<g id="Tasto_1"><rect x="16" y="648" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_1_testo" x="55.5" y="700.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">1</text></g>
+<g id="Tasto_2"><rect x="109" y="648" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_2_testo" x="148.5" y="700.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">2</text></g>
+<g id="Tasto_3"><rect x="202" y="648" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_3_testo" x="241.5" y="700.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">3</text></g>
+<g id="Tasto_uguale"><rect x="295" y="648" width="79" height="172" rx="39.5" fill="#22CC6E"/><text id="Tasto_uguale_testo" x="334.5" y="745.06" font-family="Inter-Light, Inter" font-weight="300" font-size="44.24" fill="#FFFFFF" text-anchor="middle">=</text></g>
+<g id="Tasto_segno"><rect x="16" y="741" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_segno_testo" x="55.5" y="793.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">+/-</text></g>
+<g id="Tasto_0"><rect x="109" y="741" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_0_testo" x="148.5" y="793.73" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">0</text></g>
+<g id="Tasto_virgola"><rect x="202" y="741" width="79" height="79" rx="39.5" fill="#C4B8FF"/><text id="Tasto_virgola_testo" x="241.5" y="784.13" font-family="Inter-Light, Inter" font-weight="300" font-size="36.34" fill="#111111" text-anchor="middle">,</text></g>
+</g>
+</svg>
