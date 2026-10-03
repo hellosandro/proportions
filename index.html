@@ -190,49 +190,70 @@ body {
   filter: brightness(0.95);
 }
 
-/* DESKTOP: fields on the left half, keyboard on the right half */
+/* DESKTOP: fields on the left half; right half = result (2/6) + keypad (4/6) */
 @media (min-width: 900px) {
   body {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 2fr 4fr;
     padding-bottom: 0;
   }
 
   .top {
-    width: 50%;
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
 
   .grid {
     --col: min(280px, calc((50vw - 64px - 36px) / 2));
   }
 
+  .result {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    height: auto;
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.18s ease-out;
+  }
+
+  .result.show {
+    opacity: 1;
+  }
+
+  /* Round keys, sized to fit both the width and the height of the area */
   .keyboard {
-    width: 50%;
-    height: 100%;
-    grid-template-rows: repeat(4, 1fr);
+    --k: min(110px,
+             calc((50vw - 96px - 3 * 18px) / 4),
+             calc((66.67svh - 48px - 3 * 18px) / 4));
+    grid-column: 2;
+    grid-row: 2;
+    width: auto;
+    background: none;
+    grid-template-columns: repeat(4, var(--k));
+    grid-template-rows: repeat(4, var(--k));
     grid-auto-rows: auto;
+    gap: 18px;
+    justify-content: center;
+    align-content: start;
+    padding-bottom: 48px;
   }
 
   .keyboard.hide {
-    transform: translateY(100%);
+    transform: none;
   }
 
-  .key {
+  .key,
+  .key.bottom-left,
+  .key.bottom-right {
+    border-radius: 999px;
     font-size: 28px;
   }
 
   .key.equal {
     font-size: 36px;
-  }
-
-  .key.bottom-left,
-  .key.bottom-right {
-    border-radius: 0;
-  }
-
-  .result {
-    left: 50%;
-    width: 50%;
-    height: 100%;
   }
 }
 </style>
@@ -291,6 +312,21 @@ const keyboard = document.getElementById('keyboard');
 const resultBox = document.getElementById('result');
 
 let active = fields[0];
+
+// SHRINK FONT SIZE WHEN A NUMBER IS TOO LONG FOR ITS FIELD
+function fit(f){
+  f.style.fontSize = "";
+  let size = parseFloat(getComputedStyle(f).fontSize);
+  while(f.scrollWidth > f.clientWidth && size > 12){
+    size -= 2;
+    f.style.fontSize = size + "px";
+  }
+}
+
+fields.forEach(f=>{
+  new MutationObserver(()=>fit(f)).observe(f, {childList:true, characterData:true, subtree:true});
+});
+window.addEventListener('resize', ()=>fields.forEach(fit));
 
 // READ FIELD VALUE (accepts decimal comma)
 function num(f){
