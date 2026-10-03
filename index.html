@@ -21,8 +21,7 @@
   --field-active: rgba(255,255,255,0.06);
   --equal: #cfd6df;
   --equal-active: #b6d46a;
-  --key-bg: #616161;
-  --key: #f7f7f7;
+    --key: #f7f7f7;
   --key-blue: #5bb4db;
 }
 
@@ -117,13 +116,13 @@ body {
   color: var(--equal);
 }
 
-/* RESULT BOX */
+/* RESULT BOX (mobile: slides up in place of the keypad) */
 .result {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 300px;
+  height: calc(4 * var(--k) + 3 * var(--gap) + 24px + env(safe-area-inset-bottom));
   background: var(--bg);
   display: flex;
   justify-content: center;
@@ -139,14 +138,19 @@ body {
   transform: translateY(0);
 }
 
-/* KEYBOARD */
+/* KEYPAD: round keys. --k is the key size, --gap the space between keys */
+body {
+  --gap: 14px;
+  --k: min(88px, calc((100vw - 32px - 3 * var(--gap)) / 4));
+}
+
 .keyboard {
-  width: 100%;
-  background: var(--key-bg);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 73px;
-  gap: 1px;
+  grid-template-columns: repeat(4, var(--k));
+  grid-template-rows: repeat(4, var(--k));
+  gap: var(--gap);
+  justify-content: center;
+  padding-bottom: 24px;
   transform: translateY(0);
   transition: transform 0.18s ease-out;
 }
@@ -157,13 +161,20 @@ body {
 
 .key {
   background: var(--key);
+  border-radius: 999px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 20px;
+  font-size: calc(var(--k) * 0.46);
   font-weight: 300;
   color: #000;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.key[data-action="del"] {
+  font-size: calc(var(--k) * 0.3);
 }
 
 .key.blue {
@@ -174,21 +185,13 @@ body {
 .key.equal {
   grid-column: 4;
   grid-row: 3 / span 2;
-  font-size: 26px;
+  font-size: calc(var(--k) * 0.56);
   background: #bfc3cc;
   color: white;
 }
 
 .key.equal.active {
   background: var(--equal-active);
-}
-
-.key.bottom-left {
-  border-bottom-left-radius: 14px;
-}
-
-.key.bottom-right {
-  border-bottom-right-radius: 14px;
 }
 
 .key:active {
@@ -199,9 +202,10 @@ body {
 @media (min-width: 900px) {
   body {
     /* Key size: fits both the width and the height of the keypad area */
+    --gap: 18px;
     --k: min(110px,
-             calc((50vw - 96px - 3 * 18px) / 4),
-             calc((66.67svh - 48px - 3 * 18px) / 4));
+             calc((50vw - 96px - 3 * var(--gap)) / 4),
+             calc((66.67svh - 48px - 3 * var(--gap)) / 4));
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 2fr 4fr;
@@ -223,7 +227,7 @@ body {
     grid-column: 2;
     grid-row: 1;
     /* Same width as the keypad, so the result lines up with keys 7, 4, 1 */
-    width: calc(4 * var(--k) + 3 * 18px);
+    width: calc(4 * var(--k) + 3 * var(--gap));
     justify-self: center;
     justify-content: flex-start;
     height: auto;
@@ -236,38 +240,15 @@ body {
     opacity: 1;
   }
 
-  /* Round keys */
   .keyboard {
     grid-column: 2;
     grid-row: 2;
-    width: auto;
-    background: none;
-    grid-template-columns: repeat(4, var(--k));
-    grid-template-rows: repeat(4, var(--k));
-    grid-auto-rows: auto;
-    gap: 18px;
-    justify-content: center;
     align-content: start;
     padding-bottom: 48px;
   }
 
   .keyboard.hide {
     transform: none;
-  }
-
-  .key,
-  .key.bottom-left,
-  .key.bottom-right {
-    border-radius: 999px;
-    font-size: calc(var(--k) * 0.46);
-  }
-
-  .key[data-action="del"] {
-    font-size: calc(var(--k) * 0.3);
-  }
-
-  .key.equal {
-    font-size: calc(var(--k) * 0.56);
   }
 }
 </style>
@@ -306,9 +287,9 @@ body {
   <div class="key">1</div>
   <div class="key">2</div>
   <div class="key">3</div>
-  <div class="key equal bottom-right" data-action="equal">=</div>
+  <div class="key equal" data-action="equal">=</div>
 
-  <div class="key bottom-left" data-action="sign">+/-</div>
+  <div class="key" data-action="sign">+/-</div>
   <div class="key">0</div>
   <div class="key">,</div>
 </div>
