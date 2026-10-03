@@ -16,13 +16,18 @@
 
 <style>
 :root {
-  --bg: #3C3F4F;
-  --bg-fields: #2E303C;
-  --field-active: rgba(255,255,255,0.06);
-  --equal: #cfd6df;
-  --equal-active: #b6d46a;
-    --key: #f7f7f7;
-  --key-blue: #5bb4db;
+  /* Pop palette */
+  --bg: #F2FBE3;            /* cream */
+  --bg-fields: #4D4DFF;     /* electric blue */
+  --text-fields: #F2FBE3;
+  --field-active: #E6FC9C;  /* lime pill */
+  --equal: #E6FC9C;         /* fraction bars and = sign */
+  --equal-off: #DCE3CB;
+  --equal-active: #22CC6E;  /* green */
+  --key: #C4B8FF;           /* lavender */
+  --key-blue: #FF2BD6;      /* magenta: C */
+  --key-del: #FF6B35;       /* orange: DEL */
+  --ink: #111111;
 }
 
 /* GLOBAL */
@@ -35,7 +40,7 @@ html {
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
-  color: white;
+  color: var(--ink);
   height: 100svh;
   display: flex;
   flex-direction: column;
@@ -51,6 +56,8 @@ body {
                              b     d   */
 .top {
   flex: 1;
+  background: var(--bg-fields);
+  color: var(--text-fields);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -87,6 +94,7 @@ body {
 
 .field.active {
   background: var(--field-active);
+  color: var(--ink);
   border-radius: 999px;
 }
 
@@ -122,7 +130,7 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: calc(4 * var(--k) + 3 * var(--gap) + 24px + env(safe-area-inset-bottom));
+  height: calc(4 * var(--k) + 3 * var(--gap) + 48px + env(safe-area-inset-bottom));
   background: var(--bg);
   display: flex;
   justify-content: center;
@@ -131,7 +139,7 @@ body {
   font-weight: 300;
   transform: translateY(100%);
   transition: transform 0.18s ease-out;
-  color: white;
+  color: var(--ink);
 }
 
 .result.show {
@@ -150,6 +158,7 @@ body {
   grid-template-rows: repeat(4, var(--k));
   gap: var(--gap);
   justify-content: center;
+  padding-top: 24px;
   padding-bottom: 24px;
   transform: translateY(0);
   transition: transform 0.18s ease-out;
@@ -167,7 +176,7 @@ body {
   align-items: center;
   font-size: calc(var(--k) * 0.46);
   font-weight: 300;
-  color: #000;
+  color: var(--ink);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -182,11 +191,15 @@ body {
   color: white;
 }
 
+.key.blue[data-action="del"] {
+  background: var(--key-del);
+}
+
 .key.equal {
   grid-column: 4;
   grid-row: 3 / span 2;
   font-size: calc(var(--k) * 0.56);
-  background: #bfc3cc;
+  background: var(--equal-off);
   color: white;
 }
 
@@ -215,7 +228,6 @@ body {
   .top {
     grid-column: 1;
     grid-row: 1 / span 2;
-    background: var(--bg-fields);
   }
 
   .grid {
