@@ -189,6 +189,52 @@ body {
 .key:active {
   filter: brightness(0.95);
 }
+
+/* DESKTOP: fields on the left half, keyboard on the right half */
+@media (min-width: 900px) {
+  body {
+    flex-direction: row;
+    padding-bottom: 0;
+  }
+
+  .top {
+    width: 50%;
+  }
+
+  .grid {
+    --col: min(280px, calc((50vw - 64px - 36px) / 2));
+  }
+
+  .keyboard {
+    width: 50%;
+    height: 100%;
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .keyboard.hide {
+    transform: translateY(100%);
+  }
+
+  .key {
+    font-size: 28px;
+  }
+
+  .key.equal {
+    font-size: 36px;
+  }
+
+  .key.bottom-left,
+  .key.bottom-right {
+    border-radius: 0;
+  }
+
+  .result {
+    left: 50%;
+    width: 50%;
+    height: 100%;
+  }
+}
 </style>
 </head>
 
