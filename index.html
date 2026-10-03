@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>Proportions</title>
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Proportions">
+
+<style>
+:root {
+  --bg: #3C3F4F;
+  --field: #4F5260;
+  --field-active: #ffffff;
+  --equal: #cfd6df;
+  --equal-active: #b6d46a;
+  --key-bg: #616161;
+  --key: #f7f7f7;
+  --key-blue: #5bb4db;
+}
+
+/* GLOBAL */
+* { box-sizing: border-box; margin:0; padding:0; }
+html {
+  background: var(--bg);
+  overflow: hidden;
+  height: 100%;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: white;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  overscroll-behavior: none;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* TOP GRID
+   Layout as two fractions:  a     c
+                             ─  =  ─
+                             b     d   */
+.top {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid {
+  position: relative;
+  width: 356px;
+  display: grid;
+  grid-template-columns: 160px 160px;
+  column-gap: 36px;
+  row-gap: 37px;
+}
+
+.field {
+  height: 69px;
+  background: var(--field);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.field.active {
+  background: var(--field-active);
+  color: #000;
+}
+
+.field.inactive {
+  opacity: 0.5;
+}
+
+/* FRACTION BARS */
+.bar {
+  position: absolute;
+  top: 50%;
+  width: 160px;
+  height: 2px;
+  background: var(--equal);
+  transform: translateY(-50%);
+}
+
+.bar.left  { left: 0; }
+.bar.right { right: 0; }
+
+.equal-top {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  color: var(--equal);
+}
+
+/* RESULT BOX */
+.result {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 66px;
+  font-weight: 500;
+  transform: translateY(100%);
+  transition: transform 0.18s ease-out;
+  color: white;
+}
+
+.result.show {
+  transform: translateY(0);
+}
+
+/* KEYBOARD */
+.keyboard {
+  width: 100%;
+  background: var(--key-bg);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 73px;
+  gap: 1px;
+  transform: translateY(0);
+  transition: transform 0.18s ease-out;
+}
+
+.keyboard.hide {
+  transform: translateY(calc(100% + env(safe-area-inset-bottom)));
+}
+
+.key {
+  background: var(--key);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+  cursor: pointer;
+}
+
+.key.blue {
+  background: var(--key-blue);
+  color: white;
+}
+
+.key.equal {
+  grid-column: 4;
+  grid-row: 3 / span 2;
+  font-size: 26px;
+  background: #bfc3cc;
+  color: white;
+}
+
+.key.equal.active {
+  background: var(--equal-active);
+}
+
+.key.bottom-left {
+  border-bottom-left-radius: 14px;
+}
+
+.key.bottom-right {
+  border-bottom-right-radius: 14px;
+}
+
+.key:active {
+  filter: brightness(0.95);
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP GRID: a/b = c/d  (f0 = a, f2 = b, f1 = c, f3 = d) -->
+<div class="top">
+  <div class="grid">
+    <div class="field active" id="f0"></div>
+    <div class="field" id="f1"></div>
+    <div class="field" id="f2"></div>
+    <div class="field" id="f3"></div>
+    <div class="bar left"></div>
+    <div class="bar right"></div>
+    <div class="equal-top">=</div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result" id="result"></div>
+
+<!-- KEYBOARD -->
+<div class="keyboard" id="keyboard">
+  <div class="key">7</div>
+  <div class="key">8</div>
+  <div class="key">9</div>
+  <div class="key blue" data-action="clear">C</div>
+
+  <div class="key">4</div>
+  <div class="key">5</div>
+  <div class="key">6</div>
+  <div class="key blue" data-action="del">DEL</div>
+
+  <div class="key">1</div>
+  <div class="key">2</div>
+  <div class="key">3</div>
+  <div class="key equal bottom-right" data-action="equal">=</div>
+
+  <div class="key bottom-left" data-action="sign">+/-</div>
+  <div class="key">0</div>
+  <div class="key">,</div>
+</div>
+
+<script>
+// PREVENT SCROLL & BOUNCE IN STANDALONE (PWA) MODE
+if (window.navigator.standalone) {
+  document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+}
+
+// ELEMENTS
+const fields = document.querySelectorAll('.field');
+const equalKey = document.querySelector('.key.equal');
+const keyboard = document.getElementById('keyboard');
+const resultBox = document.getElementById('result');
+
+let active = fields[0];
+
+// READ FIELD VALUE (accepts decimal comma)
+function num(f){
+  return parseFloat(f.innerText.replace(",", "."));
+}
+
+// ACTIVATE FIELD
+fields.forEach(f=>{
+  f.addEventListener('click', ()=>{
+    hideResult();
+    fields.forEach(x=>x.classList.remove('active'));
+    f.classList.add('active');
+    active = f;
+  });
+});
+
+// KEYBOARD INPUT
+document.querySelectorAll('.key').forEach(k=>{
+  k.addEventListener('click', ()=> handleKey(k));
+});
+
+function handleKey(k){
+  const val = k.innerText;
+  const act = k.dataset.action;
+
+  if(!act) active.innerText += val;
+  if(act==="clear") active.innerText = "";
+  if(act==="del") clearAll();
+  if(act==="sign") {
+    active.innerText = active.innerText.startsWith("-")
+      ? active.innerText.slice(1)
+      : "-" + active.innerText;
+  }
+  if(act==="equal") calculate();
+
+  updateEqualState();
+}
+
+// UPDATE EQUAL BUTTON
+function updateEqualState(){
+  const filled = [...fields].map(num).filter(v=>!isNaN(v)).length;
+  equalKey.classList.toggle("active", filled===3);
+}
+
+// CALCULATE PROPORTION  a/b = c/d  →  a·d = b·c
+function calculate(){
+  const v = [...fields].map(num);
+  if(v.filter(x=>!isNaN(x)).length !==3) return;
+
+  let result;
+  let emptyIndex = v.findIndex(x=>isNaN(x));
+
+  if(emptyIndex===0) result = (v[1]*v[2])/v[3];
+  if(emptyIndex===1) result = (v[0]*v[3])/v[2];
+  if(emptyIndex===2) result = (v[0]*v[3])/v[1];
+  if(emptyIndex===3) result = (v[1]*v[2])/v[0];
+
+  fields.forEach((f,i)=>{
+    if(i===emptyIndex){
+      f.innerText="x";
+      f.classList.add("inactive");
+    }
+  });
+
+  showResult(result.toLocaleString('it-IT', {maximumFractionDigits:2}));
+}
+
+// SHOW/HIDE RESULT
+function showResult(val){
+  resultBox.innerText = val;
+  resultBox.classList.add("show");
+  keyboard.classList.add("hide");
+}
+
+function hideResult(){
+  resultBox.classList.remove("show");
+  keyboard.classList.remove("hide");
+  fields.forEach(f=>{
+    if(f.innerText==="x"){
+      f.innerText="";
+      f.classList.remove("inactive");
+    }
+  });
+}
+
+// CLEAR ALL FIELDS
+function clearAll(){
+  resultBox.classList.remove("show");
+  keyboard.classList.remove("hide");
+  fields.forEach(f=>{
+    f.innerText="";
+    f.classList.remove("inactive");
+  });
+  updateEqualState();
+}
+
+// DESKTOP KEYBOARD INPUT
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+  // Digits
+  if(/^[0-9]$/.test(e.key)){
+    if(resultBox.classList.contains("show")) hideResult();
+    active.innerText += e.key;
+    updateEqualState();
+    e.preventDefault(); return;
+  }
+  // Decimal separator
+  if(e.key==="." || e.key===","){
+    if(resultBox.classList.contains("show")) hideResult();
+    active.innerText += ",";
+    updateEqualState();
+    e.preventDefault(); return;
+  }
+  // Backspace → delete last character
+  if(e.key==="Backspace"){
+    active.innerText = active.innerText.slice(0,-1);
+    updateEqualState();
+    e.preventDefault(); return;
+  }
+  // Delete → clear current field (like C)
+  if(e.key==="Delete"){
+    active.innerText = "";
+    updateEqualState();
+    e.preventDefault(); return;
+  }
+  // Escape → clear all fields (like DEL)
+  if(e.key==="Escape"){
+    clearAll();
+    e.preventDefault(); return;
+  }
+  // Enter / = → calculate
+  if(e.key==="Enter" || e.key==="="){
+    calculate();
+    e.preventDefault(); return;
+  }
+  // Minus → toggle sign
+  if(e.key==="-"){
+    active.innerText = active.innerText.startsWith("-")
+      ? active.innerText.slice(1)
+      : "-"+active.innerText;
+    updateEqualState();
+    e.preventDefault(); return;
+  }
+  // Tab → cycle through fields
+  if(e.key==="Tab"){
+    const idx = [...fields].indexOf(active);
+    const next = (idx + (e.shiftKey ? 3 : 1)) % 4;
+    hideResult();
+    fields.forEach(f=>f.classList.remove("active"));
+    fields[next].classList.add("active");
+    active = fields[next];
+    e.preventDefault(); return;
+  }
+  // Arrow keys → navigate 2×2 grid
+  // Layout: f0 f1 / f2 f3
+  const arrowNav = {
+    ArrowRight: [1,1,3,3],
+    ArrowLeft:  [0,0,2,2],
+    ArrowDown:  [2,3,2,3],
+    ArrowUp:    [0,1,0,1]
+  };
+  if(arrowNav[e.key]!==undefined){
+    const idx = [...fields].indexOf(active);
+    const next = arrowNav[e.key][idx];
+    hideResult();
+    fields.forEach(f=>f.classList.remove("active"));
+    fields[next].classList.add("active");
+    active = fields[next];
+    e.preventDefault();
+  }
+});
+</script>
+
+</body>
+</html>
