@@ -40,6 +40,7 @@
 /* GLOBAL */
 * { box-sizing: border-box; margin:0; padding:0; }
 html {
+  -webkit-tap-highlight-color: transparent;
   background: var(--bg);
   overflow: hidden;
   height: 100%;
@@ -158,8 +159,9 @@ body {
    Proportions follow the iOS Calculator: gap = 10% of a key, digits ≈ 31% of
    a key tall. Four keys and three gaps = 4.3 keys across the screen. */
 body {
-  --k: min(100px, calc((100vw - 32px) / 4.3));
-  --gap: calc(var(--k) * 0.1);
+  /* Whole pixels: fractional sizes make Safari draw the round edges slightly off */
+  --k: round(down, min(100px, calc((100vw - 32px) / 4.3)), 1px);
+  --gap: round(calc(var(--k) * 0.1), 1px);
 }
 
 .keyboard {
@@ -167,7 +169,10 @@ body {
   grid-template-columns: repeat(4, var(--k));
   grid-template-rows: repeat(4, var(--k));
   gap: var(--gap);
-  justify-content: center;
+  /* Centered by hand, rounded to a whole pixel (plain centering can land on .5px) */
+  --keys-left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
+  justify-content: start;
+  padding-left: var(--keys-left);
   padding-top: 24px;
   padding-bottom: 24px;
   transform: translateY(0);
@@ -190,6 +195,7 @@ body {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .key[data-action="del"] {
@@ -228,9 +234,9 @@ body {
 @media (min-width: 900px) {
   body {
     /* Key size: fits both the width and the height of the keypad area */
-    --k: min(110px,
+    --k: round(down, min(110px,
              calc((50vw - 96px) / 4.3),
-             calc((66.67svh - 48px) / 4.3));
+             calc((66.67svh - 48px) / 4.3)), 1px);
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 2fr 4fr;
@@ -252,7 +258,8 @@ body {
     grid-row: 1;
     /* Same width as the keypad, so the result lines up with keys 7, 4, 1 */
     width: calc(4 * var(--k) + 3 * var(--gap));
-    justify-self: center;
+    justify-self: start;
+    margin-left: round(down, calc((50vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     justify-content: flex-start;
     height: auto;
     transform: none;
@@ -265,6 +272,7 @@ body {
   }
 
   .keyboard {
+    --keys-left: round(down, calc((50vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     grid-column: 2;
     grid-row: 2;
     align-content: start;
