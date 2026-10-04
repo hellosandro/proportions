@@ -137,21 +137,23 @@ body {
 .bar {
   position: absolute;
   top: 50%;
-  width: var(--col);
+  width: calc(var(--col) / 2);   /* half the field width, centered under it */
   height: 2px;
   background: var(--equal);
   transform: translateY(-50%);
 }
 
-.bar.left  { left: 0; }
-.bar.right { right: 0; }
+.bar.left  { left: calc(var(--col) / 4); }
+.bar.right { right: calc(var(--col) / 4); }
 
 .equal-top {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
+  /* the "=" glyph sits low in its line box: lift it to the bars' axis */
+  transform: translate(-50%, calc(-50% - 0.07em));
+  font-size: calc(var(--k) * 0.56);   /* same size as the = on the key */
+  line-height: 1;
   color: var(--equal);
 }
 
