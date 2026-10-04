@@ -77,9 +77,13 @@ body {
 }
 
 /* Phones and tablets: fields sit right above the keypad, with the same
-   24px gap the keypad keeps from the top of its own area */
+   24px gap the keypad keeps from the top of its own area. Each field is as
+   wide as two keys plus the gap between them, so fields and keypad share
+   the same width, columns and left edge. */
 @media (max-width: 899px) {
   .top {
+    justify-content: flex-start;
+    padding-left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     align-items: flex-end;
     padding-bottom: 24px;
     /* keep the settings badge clear of the first field */
@@ -95,6 +99,16 @@ body {
   grid-template-columns: var(--col) var(--col);
   column-gap: 36px;
   row-gap: 24px;
+}
+
+@media (max-width: 899px) {
+  .grid {
+    --col: calc(2 * var(--k) + var(--gap));
+    column-gap: var(--gap);
+  }
+  .top .settings-btn {
+    left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
+  }
 }
 
 .field {
