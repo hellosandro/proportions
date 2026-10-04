@@ -21,6 +21,7 @@
   --bg: #4D4DFF;            /* keypad area: electric blue */
   --bg-fields: #4D4DFF;     /* fields area: same blue as the keypad */
   --field-bg: #F2FBE3;      /* cream pills behind the numbers */
+  --field-idle-opacity: 0.5; /* fields not being written */
   --text-fields: #4D4DFF;
   --field-active: #FFFFFF;
   --equal: #F2FBE3;         /* fraction bars and = sign */
@@ -85,7 +86,7 @@ body {
 }
 
 .field {
-  height: 76px;
+  height: var(--k);   /* same as the key diameter */
   background: var(--field-bg, transparent);
   border-radius: 999px;
   display: flex;
@@ -100,9 +101,12 @@ body {
 
 @media (max-width: 600px) {
   .field {
-    height: 58px;
     font-size: 48px;
   }
+}
+
+.field:not(.active) {
+  opacity: var(--field-idle-opacity, 1);
 }
 
 .field.active {
@@ -753,22 +757,22 @@ document.addEventListener('keydown', e=>{
 // COLOR THEMES — chosen in the settings panel and remembered on this device
 const THEMES = {
   pop: { name: 'Pop', colors: {
-    '--bg':'#4D4DFF','--bg-fields':'#4D4DFF','--field-bg':'#F2FBE3','--text-fields':'#4D4DFF','--field-active':'#FFFFFF',
+    '--bg':'#4D4DFF','--bg-fields':'#4D4DFF','--field-bg':'#F2FBE3','--field-idle-opacity':'0.5','--text-fields':'#4D4DFF','--field-active':'#FFFFFF',
     '--equal':'#F2FBE3','--icon':'#F2FBE3','--equal-off':'#22CC6E','--equal-active':'#22CC6E','--key':'#FF2BD6',
     '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
   grafite: { name: 'Grafite', colors: {
-    '--bg':'#3C3F4F','--bg-fields':'#2E303C','--text-fields':'#FFFFFF','--field-bg':'transparent','--icon':'#FFFFFF','--field-active':'#3A3D4B',
+    '--bg':'#3C3F4F','--bg-fields':'#2E303C','--text-fields':'#FFFFFF','--field-bg':'transparent','--field-idle-opacity':'1','--icon':'#FFFFFF','--field-active':'#3A3D4B',
     '--equal':'#CFD6DF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--key':'#F7F7F7',
     '--key-blue':'#5BB4DB','--key-del':'#5BB4DB','--ink':'#FFFFFF','--text-active':'#FFFFFF',
     '--text-result':'#FFFFFF','--text-keys':'#111111','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
   notte: { name: 'Notte', colors: {
-    '--bg':'#000000','--bg-fields':'#141414','--text-fields':'#FFFFFF','--field-bg':'transparent','--icon':'#FFFFFF','--field-active':'#2C2C2E',
+    '--bg':'#000000','--bg-fields':'#141414','--text-fields':'#FFFFFF','--field-bg':'transparent','--field-idle-opacity':'1','--icon':'#FFFFFF','--field-active':'#2C2C2E',
     '--equal':'#8E8E93','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--key':'#333333',
     '--key-blue':'#A5A5A5','--key-del':'#A5A5A5','--ink':'#FFFFFF','--text-active':'#FFFFFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#000000','--text-del':'#000000','--text-equal':'#FFFFFF' }},
   carta: { name: 'Carta', colors: {
-    '--bg':'#F2F2F2','--bg-fields':'#FFFFFF','--text-fields':'#111111','--field-bg':'transparent','--icon':'#111111','--field-active':'#EFEFEF',
+    '--bg':'#F2F2F2','--bg-fields':'#FFFFFF','--text-fields':'#111111','--field-bg':'transparent','--field-idle-opacity':'1','--icon':'#111111','--field-active':'#EFEFEF',
     '--equal':'#111111','--equal-off':'#D6D6D6','--equal-active':'#111111','--key':'#FFFFFF',
     '--key-blue':'#111111','--key-del':'#111111','--ink':'#111111','--text-active':'#111111',
     '--text-result':'#111111','--text-keys':'#111111','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }}
