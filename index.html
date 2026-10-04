@@ -212,6 +212,8 @@ body.rows .field.computed {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 16px;
+  white-space: nowrap;
   font-size: 66px;
   font-weight: 300;
   transform: translateY(100%);
@@ -335,18 +337,16 @@ body.rows .key { color: var(--row-text); }
     --col: min(280px, calc((50vw - 64px - 36px) / 2));
   }
 
+  /* The result replaces the keypad, centered in the right half */
   .result {
     position: static;
     grid-column: 2;
-    grid-row: 1;
-    /* Same width as the keypad, so the result lines up with keys 7, 4, 1 */
-    width: calc(4 * var(--k) + 3 * var(--gap));
-    justify-self: start;
-    margin-left: round(down, calc((50vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
-    justify-content: flex-start;
+    grid-row: 1 / span 2;
+    width: auto;
     height: auto;
     transform: none;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.18s ease-out;
   }
 
@@ -364,7 +364,10 @@ body.rows .key { color: var(--row-text); }
 
   .keyboard.hide {
     transform: none;
+    opacity: 0;
+    pointer-events: none;
   }
+  .keyboard { transition: opacity 0.18s ease-out; }
 }
 
 /* SETTINGS: button in the top-left corner of the fields area, panel as a sheet */
@@ -654,6 +657,7 @@ if (window.navigator.standalone) {
 // ELEMENTS
 const fields = document.querySelectorAll('.field');
 const keyboard = document.getElementById('keyboard');
+const resultBox = document.getElementById('result');
 
 let active = fields[0];
 
@@ -685,31 +689,68 @@ function num(f){
   return parseFloat(f.innerText.replace(",", "."));
 }
 
-// UNKNOWN FIELD — the field that gets the result. It is chosen the first time
-// three fields are filled (the one left empty) and shows "x" until you press =.
-// Once a result is showing, tapping any field makes its partner in the same
-// fraction column (above or below) the unknown one: the old result is kept as
-// a value you can edit.
+// UNKNOWN FIELD — the field shown as "x". It is chosen the first time three
+// fields are filled (the one left empty). Pressing = shows the result in the
+// keypad's place. After that, tapping any field makes its partner in the same
+// fraction column (above or below) the unknown one: the result is kept as a
+// value of the field it belonged to, so you can edit it.
 let liveIndex = null;
-let solved = false;          // true after =, false again at the next edit
+let solved = false;          // a result is showing (until the next edit)
+let lastResult = NaN;
 let replaceOnType = false;   // first keystroke replaces a value taken over from a result
 const partner = i => [2, 3, 0, 1][i];   // f0 a ↔ f2 b, f1 c ↔ f3 d
+
+function formatNumber(n){
+  return n.toLocaleString('it-IT', {maximumFractionDigits:2, useGrouping:false});
+}
+
+// SHOW / HIDE THE RESULT (it takes the keypad's place)
+function showResult(text){
+  resultBox.innerText = text;
+  resultBox.classList.add('show');
+  keyboard.classList.add('hide');
+  fitResult();
+}
+function hideResult(){
+  resultBox.classList.remove('show');
+  keyboard.classList.remove('hide');
+}
+function fitResult(){
+  resultBox.style.fontSize = '';
+  const cs = getComputedStyle(resultBox);
+  const room = resultBox.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const range = document.createRange();
+  range.selectNodeContents(resultBox);
+  let size = parseFloat(cs.fontSize);
+  while(range.getBoundingClientRect().width > room && size > 12){
+    size -= 2;
+    resultBox.style.fontSize = size + 'px';
+  }
+}
+
+// tapping the result brings the keypad back
+resultBox.addEventListener('click', hideResult);
 
 // ACTIVATE FIELD
 function activate(f){
   const i = [...fields].indexOf(f);
   replaceOnType = false;
-  const live = liveIndex !== null ? fields[liveIndex] : null;
+  hideResult();
 
-  if(live && live.classList.contains('computed') && partner(i) !== liveIndex){
-    live.classList.remove('computed');        // freeze the result as a typed value
+  if(solved && liveIndex !== null && partner(i) !== liveIndex){
+    // keep the result as the value of its field, and make the partner the unknown
+    const r = fields[liveIndex];
+    r.classList.remove('unknown');
+    r.innerText = formatNumber(lastResult);
+    r.dataset.exact = lastResult;
+    r.dataset.shown = r.innerText;
     if(i === liveIndex) replaceOnType = true;  // typing in it starts a new number
     liveIndex = partner(i);
     fields[liveIndex].innerText = '';
-    solved = false;
   } else if(i === liveIndex){
     liveIndex = null;                          // no result yet: just a normal field
   }
+  solved = false;
 
   fields.forEach(x=>x.classList.remove('active'));
   f.classList.add('active');
@@ -720,11 +761,13 @@ function activate(f){
 // Typing helpers: after taking over a result, the first key starts a new number
 function typeChar(ch){
   solved = false;
+  hideResult();
   if(replaceOnType){ active.innerText = ''; replaceOnType = false; }
   active.innerText += ch;
 }
 function editActive(fn){
   solved = false;
+  hideResult();
   replaceOnType = false;
   active.innerText = fn(active.innerText);
 }
@@ -744,7 +787,7 @@ function handleKey(k){
   if(act==="clear") editActive(()=> "");
   if(act==="del") clearAll();
   if(act==="sign") toggleSign();
-  if(act==="equal") solved = true;
+  if(act==="equal"){ calculate(); return; }
 
   updateLive();
 }
@@ -754,46 +797,50 @@ function toggleSign(){
 }
 
 // PROPORTION  a/b = c/d  →  a·d = b·c
-// The unknown field shows "x" while the other three hold a number, and the
-// result once you press =. Any edit turns it back into "x".
+// The unknown field shows "x" while the other three hold a number.
 function updateLive(){
   const v = [...fields].map(num);
   if(liveIndex === null){
     const empty = v.findIndex(x=>isNaN(x));
     if(v.filter(x=>!isNaN(x)).length === 3 && fields[empty] !== active) liveIndex = empty;
   }
-
   const i = liveIndex;
   const ready = i !== null && v.every((x,j)=> j===i || !isNaN(x));
-  let result = NaN;
-  if(ready && solved){
-    if(i===0) result = (v[1]*v[2])/v[3];
-    if(i===1) result = (v[0]*v[3])/v[2];
-    if(i===2) result = (v[0]*v[3])/v[1];
-    if(i===3) result = (v[1]*v[2])/v[0];
-  }
 
   fields.forEach((f,j)=>{
-    const wasShown = f.classList.contains('computed') || f.classList.contains('unknown');
+    const wasX = f.classList.contains('unknown') || f.classList.contains('computed');
     f.classList.remove('computed', 'unknown');
-    if(j===i && isFinite(result)){
-      f.classList.add('computed');
-      f.innerText = result.toLocaleString('it-IT', {maximumFractionDigits:2, useGrouping:false});
-      f.dataset.exact = result;
-      f.dataset.shown = f.innerText;
-    } else if(j===i && ready){
+    if(j===i && ready){
       f.classList.add('unknown');
       f.innerText = 'x';
-    } else if(wasShown){
+    } else if(wasX){
       f.innerText = '';
     }
   });
+  return ready ? v : null;
+}
+
+// = : calculate and show the result in place of the keypad
+function calculate(){
+  const v = updateLive();
+  if(!v) return;
+  const i = liveIndex;
+  let r;
+  if(i===0) r = (v[1]*v[2])/v[3];
+  if(i===1) r = (v[0]*v[3])/v[2];
+  if(i===2) r = (v[0]*v[3])/v[1];
+  if(i===3) r = (v[1]*v[2])/v[0];
+  if(!isFinite(r)) return;
+  lastResult = r;
+  solved = true;
+  showResult(formatNumber(r));
 }
 
 // CLEAR ALL FIELDS
 function clearAll(){
   liveIndex = null;
   solved = false;
+  hideResult();
   replaceOnType = false;
   fields.forEach(f=>{
     f.innerText="";
@@ -842,8 +889,7 @@ document.addEventListener('keydown', e=>{
   }
   // Enter / = → calculate
   if(e.key==="Enter" || e.key==="="){
-    solved = true;
-    updateLive();
+    calculate();
     e.preventDefault(); return;
   }
   // Minus → toggle sign
