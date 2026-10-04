@@ -210,6 +210,8 @@ body {
   grid-column: 4;
   grid-row: 3 / span 2;
   font-size: calc(var(--k) * 0.56);
+  /* The "=" glyph sits low in its line box: lift it to the optical center */
+  padding-bottom: 0.15em;
   background: var(--equal-off);
   color: var(--text-equal);
 }
