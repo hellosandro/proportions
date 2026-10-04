@@ -76,6 +76,17 @@ body {
   align-items: center;
 }
 
+/* Phones and tablets: fields sit right above the keypad, with the same
+   24px gap the keypad keeps from the top of its own area */
+@media (max-width: 899px) {
+  .top {
+    align-items: flex-end;
+    padding-bottom: 24px;
+    /* keep the settings badge clear of the first field */
+    padding-top: calc(16px + var(--k) / 2 + 12px + env(safe-area-inset-top));
+  }
+}
+
 .grid {
   /* Column width: 280px on desktop, shrinks to fit phones (16px side margins) */
   --col: min(280px, calc((100vw - 32px - 36px) / 2));
