@@ -106,7 +106,8 @@ body {
 }
 
 .field:not(.active) {
-  opacity: var(--field-idle-opacity, 1);
+  /* Fade only the pill, never the number */
+  background: color-mix(in srgb, var(--field-bg, transparent) calc(var(--field-idle-opacity, 1) * 100%), transparent);
 }
 
 .field.active {
