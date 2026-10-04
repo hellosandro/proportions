@@ -229,7 +229,7 @@ body {
   font-size: calc(var(--k) * 0.56);
   /* The "=" glyph sits low in its line box: lift it to the optical center */
   padding-bottom: 0.15em;
-  background: var(--equal-off);
+  background: var(--equal-active);   /* = is always shown as active */
   color: var(--text-equal);
 }
 
@@ -886,8 +886,7 @@ function openTuner(){
     ['--text-c',       'Testo tasto C'],
     ['--key-del',      'Tasto DEL'],
     ['--text-del',     'Testo tasto DEL'],
-    ['--equal-off',    'Tasto = spento'],
-    ['--equal-active', 'Tasto = acceso'],
+    ['--equal-active', 'Tasto ='],
     ['--text-equal',   'Testo tasto =']
   ];
   if(document.body.classList.contains('rows')) vars.push(
