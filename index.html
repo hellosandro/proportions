@@ -638,19 +638,48 @@ window.addEventListener('resize', ()=>fields.forEach(fit));
 // READ FIELD VALUE (accepts decimal comma). A computed result is not a value you typed.
 function num(f){
   if(f.classList.contains('computed')) return NaN;
+  // a result taken over as a value keeps its full precision until you edit it
+  if(f.dataset.exact && f.innerText === f.dataset.shown) return parseFloat(f.dataset.exact);
   return parseFloat(f.innerText.replace(",", "."));
 }
 
-// ACTIVATE FIELD — writing into the computed field turns it back into a normal one
+// LIVE FIELD — the field that shows the result. It is chosen the first time
+// three fields are filled (the one left empty). Once a result is showing,
+// tapping any field makes its partner in the same fraction column (above or
+// below) the live one: the old result is kept as a value you can edit.
+let liveIndex = null;
+let replaceOnType = false;   // first keystroke replaces a value taken over from a result
+const partner = i => [2, 3, 0, 1][i];   // f0 a ↔ f2 b, f1 c ↔ f3 d
+
+// ACTIVATE FIELD
 function activate(f){
-  fields.forEach(x=>x.classList.remove('active'));
-  if(f.classList.contains('computed')){
-    f.classList.remove('computed');
-    f.innerText = '';
+  const i = [...fields].indexOf(f);
+  replaceOnType = false;
+  const live = liveIndex !== null ? fields[liveIndex] : null;
+
+  if(live && live.classList.contains('computed') && partner(i) !== liveIndex){
+    live.classList.remove('computed');        // freeze the result as a typed value
+    if(i === liveIndex) replaceOnType = true;  // typing in it starts a new number
+    liveIndex = partner(i);
+    fields[liveIndex].innerText = '';
+  } else if(i === liveIndex){
+    liveIndex = null;                          // no result yet: just a normal field
   }
+
+  fields.forEach(x=>x.classList.remove('active'));
   f.classList.add('active');
   active = f;
   updateLive();
+}
+
+// Typing helpers: after taking over a result, the first key starts a new number
+function typeChar(ch){
+  if(replaceOnType){ active.innerText = ''; replaceOnType = false; }
+  active.innerText += ch;
+}
+function editActive(fn){
+  replaceOnType = false;
+  active.innerText = fn(active.innerText);
 }
 
 fields.forEach(f=> f.addEventListener('click', ()=> activate(f)));
@@ -664,8 +693,8 @@ function handleKey(k){
   const val = k.innerText;
   const act = k.dataset.action;
 
-  if(!act) active.innerText += val;
-  if(act==="clear") active.innerText = "";
+  if(!act) typeChar(val);
+  if(act==="clear") editActive(()=> "");
   if(act==="del") clearAll();
   if(act==="sign") toggleSign();
 
@@ -673,32 +702,34 @@ function handleKey(k){
 }
 
 function toggleSign(){
-  active.innerText = active.innerText.startsWith("-")
-    ? active.innerText.slice(1)
-    : "-" + active.innerText;
+  editActive(t=> t.startsWith("-") ? t.slice(1) : "-" + t);
 }
 
 // LIVE PROPORTION  a/b = c/d  →  a·d = b·c
-// As soon as three fields hold a number, the fourth shows the result,
+// The live field shows the result as soon as the other three hold a number,
 // recalculated at every keystroke.
 function updateLive(){
   const v = [...fields].map(num);
-  const filled = v.filter(x=>!isNaN(x)).length;
-  const emptyIndex = v.findIndex(x=>isNaN(x));
-
-  let result = NaN;
-  if(filled===3 && fields[emptyIndex]!==active){
-    if(emptyIndex===0) result = (v[1]*v[2])/v[3];
-    if(emptyIndex===1) result = (v[0]*v[3])/v[2];
-    if(emptyIndex===2) result = (v[0]*v[3])/v[1];
-    if(emptyIndex===3) result = (v[1]*v[2])/v[0];
+  if(liveIndex === null){
+    const empty = v.findIndex(x=>isNaN(x));
+    if(v.filter(x=>!isNaN(x)).length === 3 && fields[empty] !== active) liveIndex = empty;
   }
 
-  fields.forEach((f,i)=>{
-    const show = i===emptyIndex && isFinite(result);
-    if(show){
+  let result = NaN;
+  const i = liveIndex;
+  if(i !== null && v.every((x,j)=> j===i || !isNaN(x))){
+    if(i===0) result = (v[1]*v[2])/v[3];
+    if(i===1) result = (v[0]*v[3])/v[2];
+    if(i===2) result = (v[0]*v[3])/v[1];
+    if(i===3) result = (v[1]*v[2])/v[0];
+  }
+
+  fields.forEach((f,j)=>{
+    if(j===i && isFinite(result)){
       f.classList.add('computed');
       f.innerText = result.toLocaleString('it-IT', {maximumFractionDigits:2});
+      f.dataset.exact = result;
+      f.dataset.shown = f.innerText;
     } else if(f.classList.contains('computed')){
       f.classList.remove('computed');
       f.innerText = '';
@@ -708,6 +739,8 @@ function updateLive(){
 
 // CLEAR ALL FIELDS
 function clearAll(){
+  liveIndex = null;
+  replaceOnType = false;
   fields.forEach(f=>{
     f.innerText="";
     f.classList.remove("computed");
@@ -726,25 +759,25 @@ document.addEventListener('keydown', e=>{
 
   // Digits
   if(/^[0-9]$/.test(e.key)){
-    active.innerText += e.key;
+    typeChar(e.key);
     updateLive();
     e.preventDefault(); return;
   }
   // Decimal separator
   if(e.key==="." || e.key===","){
-    active.innerText += ",";
+    typeChar(",");
     updateLive();
     e.preventDefault(); return;
   }
   // Backspace → delete last character
   if(e.key==="Backspace"){
-    active.innerText = active.innerText.slice(0,-1);
+    editActive(t=> t.slice(0,-1));
     updateLive();
     e.preventDefault(); return;
   }
   // Delete → clear current field (like C)
   if(e.key==="Delete"){
-    active.innerText = "";
+    editActive(()=> "");
     updateLive();
     e.preventDefault(); return;
   }
