@@ -241,6 +241,15 @@ body {
   filter: brightness(0.95);
 }
 
+/* ROW THEMES: each keypad row has its own color (e.g. Arcobaleno) */
+body.rows .key[data-row="1"] { background: var(--row1); }
+body.rows .key[data-row="2"] { background: var(--row2); }
+body.rows .key[data-row="3"] { background: var(--row3); }
+body.rows .key[data-row="4"] { background: var(--row4); }
+body.rows .key.equal,
+body.rows .key.equal.active { background: var(--row-eq); }
+body.rows .key { color: var(--row-text); }
+
 /* DESKTOP: fields on the left half; right half = result (2/6) + keypad (4/6) */
 @media (min-width: 900px) {
   body {
@@ -770,6 +779,9 @@ document.addEventListener('keydown', e=>{
   }
 });
 
+// KEYPAD ROWS: 7 8 9 C / 4 5 6 DEL / 1 2 3 = / +/- 0 ,  (the = key spans rows 3-4)
+document.querySelectorAll('.key').forEach((k,i)=>{ k.dataset.row = Math.floor(i/4) + 1; });
+
 // COLOR THEMES — chosen in the settings panel and remembered on this device
 const THEMES = {
   pop: { name: 'Pop', colors: {
@@ -794,7 +806,11 @@ const THEMES = {
   rosa: { name: 'Rosa', colors: {
     '--bg-fields':'#000000','--equal':'#F7A1C4','--icon-bg':'#2A0F1A','--icon':'#F7A1C4','--field-active':'#E8317E','--text-active':'#FFFFFF','--field-idle':'#2A0F1A','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#E8317E','--text-keys':'#FFFFFF','--key-blue':'#F7A1C4','--text-c':'#8A1248','--key-del':'#F7A1C4','--text-del':'#8A1248','--equal-off':'#5A1530','--equal-active':'#F7A1C4','--text-equal':'#8A1248','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   neon: { name: 'Neon', colors: {
-    '--bg-fields':'#000000','--equal':'#12B08C','--icon-bg':'#262626','--icon':'#12B08C','--field-active':'#DCDCDC','--text-active':'#000000','--field-idle':'#262626','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#CF2BB6','--text-keys':'#FFFFFF','--key-blue':'#12B08C','--text-c':'#FFFFFF','--key-del':'#12B08C','--text-del':'#FFFFFF','--equal-off':'#0B5E4B','--equal-active':'#12B08C','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }}
+    '--bg-fields':'#000000','--equal':'#12B08C','--icon-bg':'#262626','--icon':'#12B08C','--field-active':'#DCDCDC','--text-active':'#000000','--field-idle':'#262626','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#CF2BB6','--text-keys':'#FFFFFF','--key-blue':'#12B08C','--text-c':'#FFFFFF','--key-del':'#12B08C','--text-del':'#FFFFFF','--equal-off':'#0B5E4B','--equal-active':'#12B08C','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+  arcobaleno: { name: 'Arcobaleno', rows: true, colors: {
+    '--bg-fields':'#9355E6','--equal':'#FFFFFF','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#9355E6','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#E84D24','--text-equal':'#FFFFFF','--row1':'#3177DB','--row2':'#30B498','--row3':'#DEB121','--row4':'#DA2521','--row-eq':'#E84D24','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+  lilla: { name: 'Lilla', rows: true, colors: {
+    '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9CDBF','--text-active':'#1E1E1E','--field-idle':'#DDD0EE','--text-idle':'#4A3A5A','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#3A2A4E','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
 };
 
 let currentTheme = 'pop';
@@ -802,6 +818,7 @@ function applyTheme(id){
   const theme = THEMES[id] || THEMES.pop;
   currentTheme = THEMES[id] ? id : 'pop';
   Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
+  document.body.classList.toggle('rows', !!theme.rows);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors['--bg-fields']);
   document.querySelectorAll('.theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
   if(window.refreshTuner) window.refreshTuner();
@@ -818,8 +835,11 @@ Object.entries(THEMES).forEach(([id,t])=>{
   b.className = 'theme';
   b.dataset.theme = id;
   const c = t.colors;
+  const swatch = t.rows
+    ? [c['--bg-fields'], c['--row1'], c['--row2'], c['--row3'], c['--row-eq'], c['--row4']]
+    : null;
   b.innerHTML = '<span class="theme-swatch">' +
-    [c['--bg-fields'], c['--field-active'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']]
+    (swatch || [c['--bg-fields'], c['--field-active'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']])
       .map(x=>'<span style="background:'+x+'"></span>').join('') +
     '</span>' + t.name;
   b.addEventListener('click', ()=>{
@@ -870,6 +890,14 @@ function openTuner(){
     ['--equal-active', 'Tasto = acceso'],
     ['--text-equal',   'Testo tasto =']
   ];
+  if(document.body.classList.contains('rows')) vars.push(
+    ['--row1',         'Riga 7 8 9 C'],
+    ['--row2',         'Riga 4 5 6 DEL'],
+    ['--row3',         'Riga 1 2 3'],
+    ['--row4',         'Riga +/- 0 ,'],
+    ['--row-eq',       'Tasto = (righe)'],
+    ['--row-text',     'Testo tasti (righe)']
+  );
   const root = document.documentElement;
   const current = v => getComputedStyle(root).getPropertyValue(v).trim().toUpperCase();
   const themeValue = v => ((THEMES[currentTheme] || THEMES.pop).colors[v] || '').toUpperCase();
