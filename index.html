@@ -122,6 +122,16 @@ body {
   color: var(--text-idle, var(--text-fields));
 }
 
+/* Live result: the unknown field takes the colors of the = key */
+.field.computed {
+  background: var(--equal-active);
+  color: var(--text-equal);
+}
+body.rows .field.computed {
+  background: var(--row-eq);
+  color: var(--row-text);
+}
+
 /* Blinking caret in the active field, so it is clear where you are typing */
 .field.active::after {
   content: "";
@@ -144,11 +154,6 @@ body {
   background: var(--field-active);
   color: var(--text-active);
   border-radius: 999px;
-}
-
-.field.inactive {
-  /* Fade only the "x", not the pill behind it */
-  color: color-mix(in srgb, var(--text-idle, var(--text-fields)) 50%, transparent);
 }
 
 /* FRACTION BARS */
@@ -611,9 +616,7 @@ if (window.navigator.standalone) {
 
 // ELEMENTS
 const fields = document.querySelectorAll('.field');
-const equalKey = document.querySelector('.key.equal');
 const keyboard = document.getElementById('keyboard');
-const resultBox = document.getElementById('result');
 
 let active = fields[0];
 
@@ -632,20 +635,25 @@ fields.forEach(f=>{
 });
 window.addEventListener('resize', ()=>fields.forEach(fit));
 
-// READ FIELD VALUE (accepts decimal comma)
+// READ FIELD VALUE (accepts decimal comma). A computed result is not a value you typed.
 function num(f){
+  if(f.classList.contains('computed')) return NaN;
   return parseFloat(f.innerText.replace(",", "."));
 }
 
-// ACTIVATE FIELD
-fields.forEach(f=>{
-  f.addEventListener('click', ()=>{
-    hideResult();
-    fields.forEach(x=>x.classList.remove('active'));
-    f.classList.add('active');
-    active = f;
-  });
-});
+// ACTIVATE FIELD — writing into the computed field turns it back into a normal one
+function activate(f){
+  fields.forEach(x=>x.classList.remove('active'));
+  if(f.classList.contains('computed')){
+    f.classList.remove('computed');
+    f.innerText = '';
+  }
+  f.classList.add('active');
+  active = f;
+  updateLive();
+}
+
+fields.forEach(f=> f.addEventListener('click', ()=> activate(f)));
 
 // KEYBOARD INPUT
 document.querySelectorAll('.key').forEach(k=>{
@@ -659,72 +667,52 @@ function handleKey(k){
   if(!act) active.innerText += val;
   if(act==="clear") active.innerText = "";
   if(act==="del") clearAll();
-  if(act==="sign") {
-    active.innerText = active.innerText.startsWith("-")
-      ? active.innerText.slice(1)
-      : "-" + active.innerText;
-  }
-  if(act==="equal") calculate();
+  if(act==="sign") toggleSign();
 
-  updateEqualState();
+  updateLive();
 }
 
-// UPDATE EQUAL BUTTON
-function updateEqualState(){
-  const filled = [...fields].map(num).filter(v=>!isNaN(v)).length;
-  equalKey.classList.toggle("active", filled===3);
+function toggleSign(){
+  active.innerText = active.innerText.startsWith("-")
+    ? active.innerText.slice(1)
+    : "-" + active.innerText;
 }
 
-// CALCULATE PROPORTION  a/b = c/d  →  a·d = b·c
-function calculate(){
+// LIVE PROPORTION  a/b = c/d  →  a·d = b·c
+// As soon as three fields hold a number, the fourth shows the result,
+// recalculated at every keystroke.
+function updateLive(){
   const v = [...fields].map(num);
-  if(v.filter(x=>!isNaN(x)).length !==3) return;
+  const filled = v.filter(x=>!isNaN(x)).length;
+  const emptyIndex = v.findIndex(x=>isNaN(x));
 
-  let result;
-  let emptyIndex = v.findIndex(x=>isNaN(x));
-
-  if(emptyIndex===0) result = (v[1]*v[2])/v[3];
-  if(emptyIndex===1) result = (v[0]*v[3])/v[2];
-  if(emptyIndex===2) result = (v[0]*v[3])/v[1];
-  if(emptyIndex===3) result = (v[1]*v[2])/v[0];
+  let result = NaN;
+  if(filled===3 && fields[emptyIndex]!==active){
+    if(emptyIndex===0) result = (v[1]*v[2])/v[3];
+    if(emptyIndex===1) result = (v[0]*v[3])/v[2];
+    if(emptyIndex===2) result = (v[0]*v[3])/v[1];
+    if(emptyIndex===3) result = (v[1]*v[2])/v[0];
+  }
 
   fields.forEach((f,i)=>{
-    if(i===emptyIndex){
-      f.innerText="x";
-      f.classList.add("inactive");
-    }
-  });
-
-  showResult(result.toLocaleString('it-IT', {maximumFractionDigits:2}));
-}
-
-// SHOW/HIDE RESULT
-function showResult(val){
-  resultBox.innerText = val;
-  resultBox.classList.add("show");
-  keyboard.classList.add("hide");
-}
-
-function hideResult(){
-  resultBox.classList.remove("show");
-  keyboard.classList.remove("hide");
-  fields.forEach(f=>{
-    if(f.innerText==="x"){
-      f.innerText="";
-      f.classList.remove("inactive");
+    const show = i===emptyIndex && isFinite(result);
+    if(show){
+      f.classList.add('computed');
+      f.innerText = result.toLocaleString('it-IT', {maximumFractionDigits:2});
+    } else if(f.classList.contains('computed')){
+      f.classList.remove('computed');
+      f.innerText = '';
     }
   });
 }
 
 // CLEAR ALL FIELDS
 function clearAll(){
-  resultBox.classList.remove("show");
-  keyboard.classList.remove("hide");
   fields.forEach(f=>{
     f.innerText="";
-    f.classList.remove("inactive");
+    f.classList.remove("computed");
   });
-  updateEqualState();
+  updateLive();
 }
 
 // DESKTOP KEYBOARD INPUT
@@ -738,28 +726,26 @@ document.addEventListener('keydown', e=>{
 
   // Digits
   if(/^[0-9]$/.test(e.key)){
-    if(resultBox.classList.contains("show")) hideResult();
     active.innerText += e.key;
-    updateEqualState();
+    updateLive();
     e.preventDefault(); return;
   }
   // Decimal separator
   if(e.key==="." || e.key===","){
-    if(resultBox.classList.contains("show")) hideResult();
     active.innerText += ",";
-    updateEqualState();
+    updateLive();
     e.preventDefault(); return;
   }
   // Backspace → delete last character
   if(e.key==="Backspace"){
     active.innerText = active.innerText.slice(0,-1);
-    updateEqualState();
+    updateLive();
     e.preventDefault(); return;
   }
   // Delete → clear current field (like C)
   if(e.key==="Delete"){
     active.innerText = "";
-    updateEqualState();
+    updateLive();
     e.preventDefault(); return;
   }
   // Escape → clear all fields (like DEL)
@@ -767,28 +753,21 @@ document.addEventListener('keydown', e=>{
     clearAll();
     e.preventDefault(); return;
   }
-  // Enter / = → calculate
+  // Enter / = → nothing to do: the result is already live
   if(e.key==="Enter" || e.key==="="){
-    calculate();
     e.preventDefault(); return;
   }
   // Minus → toggle sign
   if(e.key==="-"){
-    active.innerText = active.innerText.startsWith("-")
-      ? active.innerText.slice(1)
-      : "-"+active.innerText;
-    updateEqualState();
+    toggleSign();
+    updateLive();
     e.preventDefault(); return;
   }
   // Tab → next field in reading order a → b → c → d (f0 → f2 → f1 → f3)
   if(e.key==="Tab"){
     const order = [0,2,1,3];
     const pos = order.indexOf([...fields].indexOf(active));
-    const next = order[(pos + (e.shiftKey ? 3 : 1)) % 4];
-    hideResult();
-    fields.forEach(f=>f.classList.remove("active"));
-    fields[next].classList.add("active");
-    active = fields[next];
+    activate(fields[order[(pos + (e.shiftKey ? 3 : 1)) % 4]]);
     e.preventDefault(); return;
   }
   // Arrow keys → navigate 2×2 grid
@@ -800,12 +779,7 @@ document.addEventListener('keydown', e=>{
     ArrowUp:    [0,1,0,1]
   };
   if(arrowNav[e.key]!==undefined){
-    const idx = [...fields].indexOf(active);
-    const next = arrowNav[e.key][idx];
-    hideResult();
-    fields.forEach(f=>f.classList.remove("active"));
-    fields[next].classList.add("active");
-    active = fields[next];
+    activate(fields[arrowNav[e.key][[...fields].indexOf(active)]]);
     e.preventDefault();
   }
 });
