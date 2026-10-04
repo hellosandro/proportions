@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Proportions">
+<meta name="theme-color" content="#F2FBE3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap">
@@ -61,6 +62,7 @@ body {
                              ─  =  ─
                              b     d   */
 .top {
+  position: relative;
   flex: 1;
   background: var(--bg-fields);
   color: var(--text-fields);
@@ -272,6 +274,125 @@ body {
   }
 }
 
+/* SETTINGS: button in the top-left corner of the fields area, panel as a sheet */
+.settings-btn {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top));
+  left: 16px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-fields);
+  cursor: pointer;
+}
+.settings-btn svg { width: 24px; height: 24px; }
+.settings-btn:active { opacity: 0.6; }
+.settings-btn:focus { outline: none; }
+.settings-btn:focus-visible { outline: 1.5px solid currentColor; }
+
+.settings {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  background: rgba(0,0,0,0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease-out;
+}
+.settings.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.settings-card {
+  width: 100%;
+    max-width: 420px;
+  max-height: 90svh;
+  overflow-y: auto;
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+  color: #111111;
+  border-radius: 28px 28px 0 0;
+  transform: translateY(24px);
+  transition: transform 0.18s ease-out;
+}
+.settings.open .settings-card { transform: translateY(0); }
+@media (min-width: 600px) {
+  .settings { align-items: center; }
+  .settings-card { border-radius: 28px; }
+}
+.settings-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.settings h2 {
+  font-size: 28px;
+  font-weight: 300;
+}
+.settings h3 {
+  font-size: 13px;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+  margin: 24px 0 12px;
+}
+.settings-close {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: #F0F0F0;
+  color: #111;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 300;
+  cursor: pointer;
+}
+.themes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.theme {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: #F4F4F4;
+  color: #111;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 300;
+  text-align: left;
+  cursor: pointer;
+}
+.theme.selected { border-color: #111; }
+.theme-swatch {
+  display: flex;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.theme-swatch span { flex: 1; }
+.credits {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.6;
+}
+.credits a { color: inherit; }
+
 /* COLOR TUNER (open with ?colori in the address) */
 .tuner {
   position: fixed;
@@ -347,6 +468,12 @@ body {
 
 <!-- TOP GRID: a/b = c/d  (f0 = a, f2 = b, f1 = c, f3 = d) -->
 <div class="top">
+  <button class="settings-btn" id="settingsBtn" type="button" aria-label="Impostazioni">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <line x1="3" y1="7" x2="21" y2="7"/><circle cx="15" cy="7" r="2.5" fill="var(--bg-fields)"/>
+      <line x1="3" y1="17" x2="21" y2="17"/><circle cx="9" cy="17" r="2.5" fill="var(--bg-fields)"/>
+    </svg>
+  </button>
   <div class="grid">
     <div class="field active" id="f0"></div>
     <div class="field" id="f1"></div>
@@ -381,6 +508,23 @@ body {
   <div class="key" data-action="sign">+/-</div>
   <div class="key">0</div>
   <div class="key">,</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="settings" id="settings" aria-hidden="true">
+  <div class="settings-card" role="dialog" aria-label="Impostazioni">
+    <div class="settings-head">
+      <h2>Impostazioni</h2>
+      <button class="settings-close" id="settingsClose" type="button" aria-label="Chiudi">×</button>
+    </div>
+    <h3>Colori</h3>
+    <div class="themes" id="themes"></div>
+    <h3>Crediti</h3>
+    <p class="credits">
+      Design di <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
+      Carattere Inter di Rasmus Andersson
+    </p>
+  </div>
 </div>
 
 <script>
@@ -511,6 +655,10 @@ function clearAll(){
 document.addEventListener('keydown', e=>{
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(e.target.closest && e.target.closest('.tuner')) return;
+  if(document.getElementById('settings').classList.contains('open')){
+    if(e.key==="Escape") closeSettings();
+    return;
+  }
 
   // Digits
   if(/^[0-9]$/.test(e.key)){
@@ -585,6 +733,74 @@ document.addEventListener('keydown', e=>{
     e.preventDefault();
   }
 });
+
+// COLOR THEMES — chosen in the settings panel and remembered on this device
+const THEMES = {
+  pop: { name: 'Pop', colors: {
+    '--bg':'#4D4DFF','--bg-fields':'#F2FBE3','--text-fields':'#4D4DFF','--field-active':'#FFFFFF',
+    '--equal':'#4D4DFF','--equal-off':'#118D49','--equal-active':'#22CC6E','--key':'#FF2BD6',
+    '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
+    '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
+  grafite: { name: 'Grafite', colors: {
+    '--bg':'#3C3F4F','--bg-fields':'#2E303C','--text-fields':'#FFFFFF','--field-active':'#3A3D4B',
+    '--equal':'#CFD6DF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--key':'#F7F7F7',
+    '--key-blue':'#5BB4DB','--key-del':'#5BB4DB','--ink':'#FFFFFF','--text-active':'#FFFFFF',
+    '--text-result':'#FFFFFF','--text-keys':'#111111','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
+  notte: { name: 'Notte', colors: {
+    '--bg':'#000000','--bg-fields':'#141414','--text-fields':'#FFFFFF','--field-active':'#2C2C2E',
+    '--equal':'#8E8E93','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--key':'#333333',
+    '--key-blue':'#A5A5A5','--key-del':'#A5A5A5','--ink':'#FFFFFF','--text-active':'#FFFFFF',
+    '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#000000','--text-del':'#000000','--text-equal':'#FFFFFF' }},
+  carta: { name: 'Carta', colors: {
+    '--bg':'#F2F2F2','--bg-fields':'#FFFFFF','--text-fields':'#111111','--field-active':'#EFEFEF',
+    '--equal':'#111111','--equal-off':'#D6D6D6','--equal-active':'#111111','--key':'#FFFFFF',
+    '--key-blue':'#111111','--key-del':'#111111','--ink':'#111111','--text-active':'#111111',
+    '--text-result':'#111111','--text-keys':'#111111','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }}
+};
+
+function applyTheme(id){
+  const theme = THEMES[id] || THEMES.pop;
+  Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors['--bg-fields']);
+  document.querySelectorAll('.theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
+}
+
+let savedTheme = 'pop';
+try { savedTheme = localStorage.getItem('proportions-theme') || 'pop'; } catch(e) {}
+if(!THEMES[savedTheme]) savedTheme = 'pop';
+
+const themesBox = document.getElementById('themes');
+Object.entries(THEMES).forEach(([id,t])=>{
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'theme';
+  b.dataset.theme = id;
+  const c = t.colors;
+  b.innerHTML = '<span class="theme-swatch">' +
+    [c['--bg-fields'], c['--bg'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']]
+      .map(x=>'<span style="background:'+x+'"></span>').join('') +
+    '</span>' + t.name;
+  b.addEventListener('click', ()=>{
+    applyTheme(id);
+    try { localStorage.setItem('proportions-theme', id); } catch(e) {}
+  });
+  themesBox.appendChild(b);
+});
+applyTheme(savedTheme);
+
+// SETTINGS PANEL
+const settingsPanel = document.getElementById('settings');
+function openSettings(){
+  settingsPanel.classList.add('open');
+  settingsPanel.setAttribute('aria-hidden','false');
+}
+function closeSettings(){
+  settingsPanel.classList.remove('open');
+  settingsPanel.setAttribute('aria-hidden','true');
+}
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('settingsClose').addEventListener('click', closeSettings);
+settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
 
 // COLOR TUNER — open the app with ?colori in the address to try colors live
 (function(){
