@@ -122,6 +122,24 @@ body {
   color: var(--text-idle, var(--text-fields));
 }
 
+/* Blinking caret in the active field, so it is clear where you are typing */
+.field.active::after {
+  content: "";
+  width: 2px;
+  height: 0.75em;
+  margin-left: 0.06em;
+  background: currentColor;
+  border-radius: 1px;
+  animation: caret 1.1s steps(1) infinite;
+}
+@keyframes caret {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field.active::after { animation: none; }
+}
+
 .field.active {
   background: var(--field-active);
   color: var(--text-active);
