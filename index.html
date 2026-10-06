@@ -505,6 +505,28 @@ body.rows .key { color: var(--row-text); }
   font-weight: 300;
   cursor: pointer;
 }
+.modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mode {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: #F4F4F4;
+  color: #111;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 300;
+  text-align: left;
+  cursor: pointer;
+}
+.mode span { font-size: 13px; opacity: 0.55; }
+.mode.selected { border-color: #111; }
 .credits {
   font-size: 15px;
   font-weight: 300;
@@ -639,6 +661,11 @@ body.rows .key { color: var(--row-text); }
     <h3>Colori</h3>
     <div class="themes" id="themes"></div>
     <button class="edit-colors" id="editColors" type="button">Modifica colori</button>
+    <h3>Risultato</h3>
+    <div class="modes">
+      <button class="mode" type="button" data-mode="live">Live<span>mentre scrivi</span></button>
+      <button class="mode" type="button" data-mode="equal">Con =<span>quando premi =</span></button>
+    </div>
     <h3>Crediti</h3>
     <p class="credits">
       POPortions<br>
@@ -695,8 +722,13 @@ function num(f){
 // fraction column (above or below) the unknown one: the result is kept as a
 // value of the field it belonged to, so you can edit it.
 let liveIndex = null;
-let solved = false;          // a result is showing (until the next edit)
-let lastResult = NaN;
+let solved = false;          // = was pressed (until the next edit)
+let lastResult = NaN;        // latest result, at full precision
+
+// RESULT MODE — "live": the unknown field shows the result while you type and =
+// shows it big in the keypad's place. "equal": the field shows x until = .
+let liveMode = true;
+try { liveMode = localStorage.getItem('proportions-mode') !== 'equal'; } catch(e) {}
 let replaceOnType = false;   // first keystroke replaces a value taken over from a result
 const partner = i => [2, 3, 0, 1][i];   // f0 a ↔ f2 b, f1 c ↔ f3 d
 
@@ -737,10 +769,11 @@ function activate(f){
   replaceOnType = false;
   hideResult();
 
-  if(solved && liveIndex !== null && partner(i) !== liveIndex){
+  const hasResult = liveIndex !== null && isFinite(lastResult) && (solved || liveMode);
+  if(hasResult && partner(i) !== liveIndex){
     // keep the result as the value of its field, and make the partner the unknown
     const r = fields[liveIndex];
-    r.classList.remove('unknown');
+    r.classList.remove('unknown', 'computed');
     r.innerText = formatNumber(lastResult);
     r.dataset.exact = lastResult;
     r.dataset.shown = r.innerText;
@@ -797,7 +830,14 @@ function toggleSign(){
 }
 
 // PROPORTION  a/b = c/d  →  a·d = b·c
-// The unknown field shows "x" while the other three hold a number.
+function solve(v, i){
+  if(i===0) return (v[1]*v[2])/v[3];
+  if(i===1) return (v[0]*v[3])/v[2];
+  if(i===2) return (v[0]*v[3])/v[1];
+  return (v[1]*v[2])/v[0];
+}
+
+// Shows "x" (or, in live mode, the result) in the unknown field
 function updateLive(){
   const v = [...fields].map(num);
   if(liveIndex === null){
@@ -806,34 +846,39 @@ function updateLive(){
   }
   const i = liveIndex;
   const ready = i !== null && v.every((x,j)=> j===i || !isNaN(x));
+  lastResult = ready ? solve(v, i) : NaN;
 
   fields.forEach((f,j)=>{
     const wasX = f.classList.contains('unknown') || f.classList.contains('computed');
     f.classList.remove('computed', 'unknown');
-    if(j===i && ready){
+    if(j===i && ready && liveMode && isFinite(lastResult)){
+      f.classList.add('computed');
+      f.innerText = formatNumber(lastResult);
+    } else if(j===i && ready){
       f.classList.add('unknown');
       f.innerText = 'x';
     } else if(wasX){
       f.innerText = '';
     }
   });
-  return ready ? v : null;
 }
 
 // = : calculate and show the result in place of the keypad
 function calculate(){
-  const v = updateLive();
-  if(!v) return;
-  const i = liveIndex;
-  let r;
-  if(i===0) r = (v[1]*v[2])/v[3];
-  if(i===1) r = (v[0]*v[3])/v[2];
-  if(i===2) r = (v[0]*v[3])/v[1];
-  if(i===3) r = (v[1]*v[2])/v[0];
-  if(!isFinite(r)) return;
-  lastResult = r;
+  // with three numbers in, the unknown is the fourth field, even if you are in it
+  const v = [...fields].map(num);
+  if(v.filter(x=>!isNaN(x)).length === 3) liveIndex = v.findIndex(x=>isNaN(x));
+  updateLive();
+  if(!isFinite(lastResult)) return;
   solved = true;
-  showResult(formatNumber(r));
+  showResult(formatNumber(lastResult));
+}
+
+function setMode(live){
+  liveMode = live;
+  try { localStorage.setItem('proportions-mode', live ? 'live' : 'equal'); } catch(e) {}
+  document.querySelectorAll('.mode').forEach(b=> b.classList.toggle('selected', (b.dataset.mode==='live')===live));
+  updateLive();
 }
 
 // CLEAR ALL FIELDS
@@ -1113,6 +1158,9 @@ function openTuner(){
   });
   document.body.appendChild(panel);
 }
+
+document.querySelectorAll('.mode').forEach(b=> b.addEventListener('click', ()=> setMode(b.dataset.mode==='live')));
+setMode(liveMode);
 
 document.getElementById('editColors').addEventListener('click', ()=>{
   closeSettings();
