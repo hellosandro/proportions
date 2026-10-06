@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
@@ -535,7 +535,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 .credits a { color: inherit; }
 
-/* COLOR TUNER: compact bar at the top (open with "Modifica colori" or ?colori) */
+/* COLOR TUNER: compact bar at the top (open with "Edit colors" or ?colori) */
 .tuner {
   --tuner-gap: 8px;
   position: fixed;
@@ -635,7 +635,7 @@ body.tuning .settings-btn { visibility: hidden; }
 
 <!-- TOP GRID: a/b = c/d  (f0 = a, f2 = b, f1 = c, f3 = d) -->
 <div class="top">
-  <button class="settings-btn" id="settingsBtn" type="button" aria-label="Impostazioni">
+  <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <line x1="3" y1="7" x2="21" y2="7"/><circle cx="15" cy="7" r="2.5" fill="var(--icon-bg)"/>
       <line x1="3" y1="17" x2="21" y2="17"/><circle cx="9" cy="17" r="2.5" fill="var(--icon-bg)"/>
@@ -679,24 +679,24 @@ body.tuning .settings-btn { visibility: hidden; }
 
 <!-- SETTINGS -->
 <div class="settings" id="settings" aria-hidden="true">
-  <div class="settings-card" role="dialog" aria-label="Impostazioni">
+  <div class="settings-card" role="dialog" aria-label="Settings">
     <div class="settings-head">
-      <h2>Impostazioni</h2>
-      <button class="settings-close" id="settingsClose" type="button" aria-label="Chiudi">×</button>
+      <h2>Settings</h2>
+      <button class="settings-close" id="settingsClose" type="button" aria-label="Close">×</button>
     </div>
-    <h3>Colori</h3>
+    <h3>Colors</h3>
     <div class="themes" id="themes"></div>
-    <button class="edit-colors" id="editColors" type="button">Modifica colori</button>
-    <h3>Risultato</h3>
+    <button class="edit-colors" id="editColors" type="button">Edit colors</button>
+    <h3>Result</h3>
     <div class="modes">
-      <button class="mode" type="button" data-mode="live">Live<span>mentre scrivi</span></button>
-      <button class="mode" type="button" data-mode="equal">Con =<span>quando premi =</span></button>
+      <button class="mode" type="button" data-mode="live">Live<span>as you type</span></button>
+      <button class="mode" type="button" data-mode="equal">With =<span>when you press =</span></button>
     </div>
-    <h3>Crediti</h3>
+    <h3>Credits</h3>
     <p class="credits">
       POPortions<br>
-      Design di <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
-      Carattere Inter di Rasmus Andersson
+      Design by <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
+      Typeface Inter by Rasmus Andersson
     </p>
   </div>
 </div>
@@ -1000,27 +1000,27 @@ const THEMES = {
     '--equal':'#F2FBE3','--icon':'#F2FBE3','--equal-off':'#22CC6E','--equal-active':'#22CC6E','--key':'#FF2BD6',
     '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
-  grafite: { name: 'Grafite', colors: {
+  grafite: { name: 'Graphite', colors: {
     '--bg-fields':'#EDEDED','--equal':'#7B838E','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
-  notte: { name: 'Notte', colors: {
+  notte: { name: 'Night', colors: {
     '--bg-fields':'#141414','--equal':'#8E8E93','--icon-bg':'#2C2C2E','--icon':'#FFFFFF','--field-active':'#A5A5A5','--field-active-border':'#A5A5A5','--text-active':'#000000','--field-idle':'#242424','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#333333','--text-keys':'#FFFFFF','--key-blue':'#A5A5A5','--text-c':'#000000','--key-del':'#A5A5A5','--text-del':'#000000','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
-  carta: { name: 'Carta', colors: {
+  carta: { name: 'Paper', colors: {
     '--bg-fields':'#F2F2F2','--equal':'#919191','--icon-bg':'#EFEFEF','--icon':'#111111','--field-active':'#F2F2F2','--field-active-border':'#A0A0A0','--text-active':'#111111','--field-idle':'#F2F2F2','--text-idle':'#111111','--bg':'#F2F2F2','--text-result':'#111111','--key':'#FFFFFF','--text-keys':'#111111','--key-blue':'#111111','--text-c':'#FFFFFF','--key-del':'#111111','--text-del':'#FFFFFF','--equal-off':'#D6D6D6','--equal-active':'#111111','--text-equal':'#FFFFFF','--text-fields':'#111111','--ink':'#111111' }},
   tape: { name: 'Tape', colors: {
     '--bg-fields':'#D6F5FA','--equal':'#111111','--icon-bg':'#BDEBF2','--icon':'#111111','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#111111','--field-idle':'#BDEBF2','--text-idle':'#111111','--bg':'#FFFF3D','--text-result':'#111111','--key':'#FFFF3D','--text-keys':'#111111','--key-blue':'#FFFFC7','--text-c':'#111111','--key-del':'#FFFFC7','--text-del':'#111111','--equal-off':'#FFFFC7','--equal-active':'#111111','--text-equal':'#FFFF3D','--text-fields':'#111111','--ink':'#111111' }},
   serd: { name: 'Serd', colors: {
     '--bg-fields':'#3A1A1C','--equal':'#E8433A','--icon-bg':'#4C2427','--icon':'#E8433A','--field-active':'#E8433A','--field-active-border':'#E8433A','--text-active':'#3A1A1C','--field-idle':'#4C2427','--text-idle':'#E8433A','--bg':'#B5AE9B','--text-result':'#222222','--key':'#F4F0DF','--text-keys':'#222222','--key-blue':'#5B84C4','--text-c':'#FFFFFF','--key-del':'#5B84C4','--text-del':'#FFFFFF','--equal-off':'#D9928C','--equal-active':'#E8433A','--text-equal':'#FFFFFF','--text-fields':'#E8433A','--ink':'#222222' }},
-  arancia: { name: 'Arancia', colors: {
+  arancia: { name: 'Orange', colors: {
     '--bg-fields':'#F26B1D','--equal':'#2E3338','--icon-bg':'#F3C080','--icon':'#2E3338','--field-active':'#2E3338','--field-active-border':'#2E3338','--text-active':'#F3C080','--field-idle':'#F3C080','--text-idle':'#2E3338','--bg':'#2E3338','--text-result':'#F3C080','--key':'#15181B','--text-keys':'#F4F0E6','--key-blue':'#F26B1D','--text-c':'#15181B','--key-del':'#B5A88A','--text-del':'#15181B','--equal-off':'#7A705C','--equal-active':'#F3C080','--text-equal':'#15181B','--text-fields':'#2E3338','--ink':'#F3C080' }},
   rockwell: { name: 'Rockwell', colors: {
     '--bg-fields':'#2F3A40','--equal':'#B8BDB9','--icon-bg':'#3C4950','--icon':'#B8BDB9','--field-active':'#F3F3EF','--field-active-border':'#F3F3EF','--text-active':'#2F3A40','--field-idle':'#3C4950','--text-idle':'#B8BDB9','--bg':'#B8BDB9','--text-result':'#2F3A40','--key':'#F4F4F0','--text-keys':'#2F3A40','--key-blue':'#3E9A3E','--text-c':'#FFFFFF','--key-del':'#3E9A3E','--text-del':'#FFFFFF','--equal-off':'#A9D08A','--equal-active':'#7DC242','--text-equal':'#2F3A40','--text-fields':'#B8BDB9','--ink':'#2F3A40' }},
-  rosa: { name: 'Rosa', colors: {
+  rosa: { name: 'Pink', colors: {
     '--bg-fields':'#000000','--equal':'#F7A1C4','--icon-bg':'#2A0F1A','--icon':'#F7A1C4','--field-active':'#E8317E','--field-active-border':'#E8317E','--text-active':'#FFFFFF','--field-idle':'#2A0F1A','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#E8317E','--text-keys':'#FFFFFF','--key-blue':'#F7A1C4','--text-c':'#8A1248','--key-del':'#F7A1C4','--text-del':'#8A1248','--equal-off':'#5A1530','--equal-active':'#F7A1C4','--text-equal':'#8A1248','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   neon: { name: 'Neon', colors: {
     '--bg-fields':'#000000','--equal':'#12B08C','--icon-bg':'#262626','--icon':'#12B08C','--field-active':'#DCDCDC','--field-active-border':'#DCDCDC','--text-active':'#000000','--field-idle':'#262626','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#CF2BB6','--text-keys':'#FFFFFF','--key-blue':'#12B08C','--text-c':'#FFFFFF','--key-del':'#12B08C','--text-del':'#FFFFFF','--equal-off':'#0B5E4B','--equal-active':'#12B08C','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
-  arcobaleno: { name: 'Arcobaleno', rows: true, colors: {
+  arcobaleno: { name: 'Rainbow', rows: true, colors: {
     '--bg-fields':'#242324','--equal':'#FFFFFF','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#242324','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#F77C18','--text-equal':'#FFFFFF','--row1':'#2B90EE','--row2':'#35D0AE','--row3':'#F9C415','--row4':'#FB3F3C','--row-eq':'#F77C18','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
-  lilla: { name: 'Lilla', rows: true, colors: {
+  lilla: { name: 'Lilac', rows: true, colors: {
     '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9E784','--field-active-border':'#C9E784','--text-active':'#192405','--field-idle':'#DDD0EE','--text-idle':'#8756C2','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#FFFFFF','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
 };
 
@@ -1075,35 +1075,35 @@ document.getElementById('settingsBtn').addEventListener('click', openSettings);
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
 settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
 
-// COLOR TUNER — opened from "Modifica colori" in the settings, or with ?colori in the address.
+// COLOR TUNER — opened from "Edit colors" in the settings, or with ?colori in the address.
 // A compact bar at the top. Tap any part of the app to select it (or use the
 // menu), pick what to color (fill, text, border) and set the color.
 // On phones the app shrinks a little to make room, so nothing is covered.
 function tunerGroups(){
   const rows = document.body.classList.contains('rows');
   const g = [
-    {id:'fields-bg', label:'Sfondo campi',       parts:[['Fondo','--bg-fields']]},
-    {id:'bars',      label:'Barre e segno =',    parts:[['Colore','--equal']]},
-    {id:'active',    label:'Campo attivo',       parts:[['Fondo','--field-active'],['Numero','--text-active'],['Bordo','--field-active-border']]},
-    {id:'idle',      label:'Campi non attivi',   parts:[['Fondo','--field-idle'],['Numero','--text-idle']]},
-    {id:'badge',     label:'Bollo impostazioni', parts:[['Fondo','--icon-bg'],['Icona','--icon']]},
-    {id:'kbd-bg',    label:'Sfondo tastiera',    parts:[['Fondo','--bg']]},
-    {id:'result',    label:'Risultato grande',   parts:[['Testo','--text-result']]}
+    {id:'fields-bg', label:'Fields background',       parts:[['Fill','--bg-fields']]},
+    {id:'bars',      label:'Bars and = sign',    parts:[['Color','--equal']]},
+    {id:'active',    label:'Active field',       parts:[['Fill','--field-active'],['Number','--text-active'],['Border','--field-active-border']]},
+    {id:'idle',      label:'Other fields',   parts:[['Fill','--field-idle'],['Number','--text-idle']]},
+    {id:'badge',     label:'Settings button', parts:[['Fill','--icon-bg'],['Icon','--icon']]},
+    {id:'kbd-bg',    label:'Keypad background',    parts:[['Fill','--bg']]},
+    {id:'result',    label:'Big result',   parts:[['Text','--text-result']]}
   ];
   if(rows){
     g.push(
-      {id:'row1', label:'Riga 7 8 9 C',   parts:[['Fondo','--row1'],['Testo','--row-text']]},
-      {id:'row2', label:'Riga 4 5 6 DEL', parts:[['Fondo','--row2'],['Testo','--row-text']]},
-      {id:'row3', label:'Riga 1 2 3',     parts:[['Fondo','--row3'],['Testo','--row-text']]},
-      {id:'row4', label:'Riga +/- 0 ,',   parts:[['Fondo','--row4'],['Testo','--row-text']]},
-      {id:'eq',   label:'Tasto =',        parts:[['Fondo','--row-eq'],['Testo','--row-text']]}
+      {id:'row1', label:'Row 7 8 9 C',   parts:[['Fill','--row1'],['Text','--row-text']]},
+      {id:'row2', label:'Row 4 5 6 DEL', parts:[['Fill','--row2'],['Text','--row-text']]},
+      {id:'row3', label:'Row 1 2 3',     parts:[['Fill','--row3'],['Text','--row-text']]},
+      {id:'row4', label:'Row +/- 0 ,',   parts:[['Fill','--row4'],['Text','--row-text']]},
+      {id:'eq',   label:'= key',        parts:[['Fill','--row-eq'],['Text','--row-text']]}
     );
   } else {
     g.push(
-      {id:'keys', label:'Tasti numeri', parts:[['Fondo','--key'],['Cifre','--text-keys']]},
-      {id:'c',    label:'Tasto C',      parts:[['Fondo','--key-blue'],['Testo','--text-c']]},
-      {id:'del',  label:'Tasto DEL',    parts:[['Fondo','--key-del'],['Testo','--text-del']]},
-      {id:'eq',   label:'Tasto =', parts:[['Fondo','--equal-active'],['Testo','--text-equal']]}
+      {id:'keys', label:'Number keys', parts:[['Fill','--key'],['Digits','--text-keys']]},
+      {id:'c',    label:'C key',      parts:[['Fill','--key-blue'],['Text','--text-c']]},
+      {id:'del',  label:'DEL key',    parts:[['Fill','--key-del'],['Text','--text-del']]},
+      {id:'eq',   label:'= key', parts:[['Fill','--equal-active'],['Text','--text-equal']]}
     );
   }
   return g;
@@ -1153,15 +1153,15 @@ function openTuner(){
   panel.className = 'tuner';
   panel.innerHTML =
     '<div class="tuner-line">' +
-      '<select class="tuner-select" aria-label="Elemento"></select>' +
+      '<select class="tuner-select" aria-label="Element"></select>' +
       '<div class="tuner-parts"></div>' +
     '</div>' +
     '<div class="tuner-line">' +
       '<input type="color" class="tuner-picker">' +
       '<input type="text" class="tuner-hex" maxlength="7" spellcheck="false">' +
-      '<button type="button" class="tuner-copy">Copia</button>' +
+      '<button type="button" class="tuner-copy">Copy</button>' +
       '<button type="button" class="secondary tuner-reset">Reset</button>' +
-      '<button type="button" class="secondary tuner-close" aria-label="Chiudi">×</button>' +
+      '<button type="button" class="secondary tuner-close" aria-label="Close">×</button>' +
     '</div>';
   const select = panel.querySelector('.tuner-select');
   const partsBox = panel.querySelector('.tuner-parts');
@@ -1233,8 +1233,8 @@ function openTuner(){
   copyBtn.addEventListener('click', ()=>{
     const text = allVars.map(v=> labelOf(v) + ': ' + current(v)).join('\n') + '\n\n' + location.href;
     navigator.clipboard.writeText(text).then(()=>{
-      copyBtn.textContent = 'Copiati!';
-      setTimeout(()=> copyBtn.textContent = 'Copia', 1500);
+      copyBtn.textContent = 'Copied!';
+      setTimeout(()=> copyBtn.textContent = 'Copy', 1500);
     });
   });
   panel.querySelector('.tuner-reset').addEventListener('click', ()=> applyTheme(currentTheme));
