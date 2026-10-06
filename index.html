@@ -466,33 +466,50 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .themes {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.theme {
-  display: flex;
+  display: none;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  gap: 6px;
+  margin-top: 6px;
+}
+.themes.open { display: flex; }
+.theme {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
   border: 2px solid transparent;
   border-radius: 20px;
   background: #F4F4F4;
   color: #111;
   font: inherit;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 300;
   text-align: left;
   cursor: pointer;
 }
 .theme.selected { border-color: #111; }
 .theme-swatch {
+  flex: none;
   display: flex;
-  height: 44px;
-  border-radius: 12px;
+  width: 132px;
+  height: 32px;
+  border-radius: 10px;
   overflow: hidden;
 }
 .theme-swatch span { flex: 1; }
+/* the closed menu: current theme + chevron */
+.theme-picker::after {
+  content: "";
+  margin-left: auto;
+  width: 9px;
+  height: 9px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-3px) rotate(45deg);
+  transition: transform 0.18s ease-out;
+}
+.theme-picker[aria-expanded="true"]::after { transform: translateY(2px) rotate(-135deg); }
 .modes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -684,6 +701,7 @@ body.tuning .settings-btn { visibility: hidden; }
       <button class="settings-close" id="settingsClose" type="button" aria-label="Close">×</button>
     </div>
     <h3>Colors</h3>
+    <button class="theme theme-picker" id="themePicker" type="button" aria-expanded="false"></button>
     <div class="themes" id="themes"></div>
     <h3>Result</h3>
     <div class="modes">
@@ -1035,7 +1053,9 @@ function applyTheme(id){
   Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
   document.body.classList.toggle('rows', !!theme.rows);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors['--bg-fields']);
-  document.querySelectorAll('.theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
+  document.querySelectorAll('.themes .theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
+  const picker = document.getElementById('themePicker');
+  if(picker) picker.innerHTML = themeLabel(theme);
   if(window.refreshTuner) window.refreshTuner();
 }
 
@@ -1044,22 +1064,31 @@ try { savedTheme = localStorage.getItem('proportions-theme') || 'pop'; } catch(e
 if(!THEMES[savedTheme]) savedTheme = 'pop';
 
 const themesBox = document.getElementById('themes');
+const themePicker = document.getElementById('themePicker');
+
+// Swatch strip + name, used in the menu and in its list
+function themeLabel(t){
+  const c = t.colors;
+  const strip = t.rows
+    ? [c['--bg-fields'], c['--row1'], c['--row2'], c['--row3'], c['--row-eq'], c['--row4']]
+    : [c['--bg-fields'], c['--field-active'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']];
+  return '<span class="theme-swatch">' + strip.map(x=>'<span style="background:'+x+'"></span>').join('') + '</span>' + t.name;
+}
+function toggleThemes(open){
+  themesBox.classList.toggle('open', open);
+  themePicker.setAttribute('aria-expanded', open);
+}
+themePicker.addEventListener('click', ()=> toggleThemes(!themesBox.classList.contains('open')));
 Object.entries(THEMES).forEach(([id,t])=>{
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'theme';
   b.dataset.theme = id;
-  const c = t.colors;
-  const swatch = t.rows
-    ? [c['--bg-fields'], c['--row1'], c['--row2'], c['--row3'], c['--row-eq'], c['--row4']]
-    : null;
-  b.innerHTML = '<span class="theme-swatch">' +
-    (swatch || [c['--bg-fields'], c['--field-active'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']])
-      .map(x=>'<span style="background:'+x+'"></span>').join('') +
-    '</span>' + t.name;
+  b.innerHTML = themeLabel(t);
   b.addEventListener('click', ()=>{
     applyTheme(id);
     try { localStorage.setItem('proportions-theme', id); } catch(e) {}
+    toggleThemes(false);
   });
   themesBox.appendChild(b);
 });
