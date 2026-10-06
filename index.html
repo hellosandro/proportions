@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#F2FBE3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&display=swap">
 
 <style>
 :root {
@@ -493,19 +493,6 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   overflow: hidden;
 }
 .theme-swatch span { flex: 1; }
-.edit-colors {
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  border: 0;
-  border-radius: 999px;
-  background: #111;
-  color: #fff;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 300;
-  cursor: pointer;
-}
 .modes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -528,6 +515,18 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 .mode span { font-size: 13px; opacity: 0.55; }
 .mode.selected { border-color: #111; }
+.wordmark {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: #4D4DFF;      /* ORTIONS: Pop blue */
+}
+.wordmark .p1 { color: #FF2BD6; }   /* Pop magenta */
+.wordmark .o1 { color: #22CC6E; }   /* Pop green */
+.wordmark .p2 { color: #FF6B35; }   /* Pop orange */
 .credits {
   font-size: 15px;
   font-weight: 300;
@@ -535,7 +534,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 .credits a { color: inherit; }
 
-/* COLOR TUNER: compact bar at the top (open with "Edit colors" or ?colori) */
+/* COLOR TUNER: compact bar at the top (hidden: open with ?colors in the address) */
 .tuner {
   --tuner-gap: 8px;
   position: fixed;
@@ -674,7 +673,7 @@ body.tuning .settings-btn { visibility: hidden; }
 
   <div class="key" data-action="sign">+/-</div>
   <div class="key">0</div>
-  <div class="key">,</div>
+  <div class="key" data-decimal>,</div>
 </div>
 
 <!-- SETTINGS -->
@@ -686,7 +685,6 @@ body.tuning .settings-btn { visibility: hidden; }
     </div>
     <h3>Colors</h3>
     <div class="themes" id="themes"></div>
-    <button class="edit-colors" id="editColors" type="button">Edit colors</button>
     <h3>Result</h3>
     <div class="modes">
       <button class="mode" type="button" data-mode="live">Live<span>as you type</span></button>
@@ -694,7 +692,7 @@ body.tuning .settings-btn { visibility: hidden; }
     </div>
     <h3>Credits</h3>
     <p class="credits">
-      POPortions<br>
+      <span class="wordmark" aria-label="POPortions"><span class="p1">P</span><span class="o1">O</span><span class="p2">P</span>ORTIONS</span><br>
       Design by <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
       Typeface Inter by Rasmus Andersson
     </p>
@@ -734,12 +732,18 @@ fields.forEach(f=>{
 });
 window.addEventListener('resize', ()=>fields.forEach(fit));
 
+// DECIMAL SEPARATOR — follows the phone's language: "," (e.g. Italian) or "." (e.g. English).
+// Latin digits are always used, whatever the language.
+const numberFormat = new Intl.NumberFormat(navigator.language || 'en', {maximumFractionDigits:2, useGrouping:false, numberingSystem:'latn'});
+const DECIMAL = (numberFormat.formatToParts(1.5).find(p=> p.type==='decimal') || {value:'.'}).value;
+document.querySelector('.key[data-decimal]').innerText = DECIMAL;
+
 // READ FIELD VALUE (accepts decimal comma). A computed result is not a value you typed.
 function num(f){
   if(f.classList.contains('computed') || f.classList.contains('unknown')) return NaN;
   // a result taken over as a value keeps its full precision until you edit it
   if(f.dataset.exact && f.innerText === f.dataset.shown) return parseFloat(f.dataset.exact);
-  return parseFloat(f.innerText.replace(",", "."));
+  return parseFloat(f.innerText.replace(DECIMAL, "."));
 }
 
 // UNKNOWN FIELD — the field shown as "x". It is chosen the first time three
@@ -759,7 +763,7 @@ let replaceOnType = false;   // first keystroke replaces a value taken over from
 const partner = i => [2, 3, 0, 1][i];   // f0 a ↔ f2 b, f1 c ↔ f3 d
 
 function formatNumber(n){
-  return n.toLocaleString('it-IT', {maximumFractionDigits:2, useGrouping:false});
+  return numberFormat.format(n);
 }
 
 // SHOW / HIDE THE RESULT (it takes the keypad's place)
@@ -937,7 +941,7 @@ document.addEventListener('keydown', e=>{
   }
   // Decimal separator
   if(e.key==="." || e.key===","){
-    typeChar(",");
+    typeChar(DECIMAL);
     updateLive();
     e.preventDefault(); return;
   }
@@ -1075,7 +1079,7 @@ document.getElementById('settingsBtn').addEventListener('click', openSettings);
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
 settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
 
-// COLOR TUNER — opened from "Edit colors" in the settings, or with ?colori in the address.
+// COLOR TUNER — hidden: open the app with ?colors (or ?colori) in the address.
 // A compact bar at the top. Tap any part of the app to select it (or use the
 // menu), pick what to color (fill, text, border) and set the color.
 // On phones the app shrinks a little to make room, so nothing is covered.
@@ -1260,11 +1264,8 @@ function openTuner(){
 document.querySelectorAll('.mode').forEach(b=> b.addEventListener('click', ()=> setMode(b.dataset.mode==='live')));
 setMode(liveMode);
 
-document.getElementById('editColors').addEventListener('click', ()=>{
-  closeSettings();
-  openTuner();
-});
-if(new URLSearchParams(location.search).has('colori')) openTuner();
+const tunerParams = new URLSearchParams(location.search);
+if(tunerParams.has('colors') || tunerParams.has('colori')) openTuner();
 </script>
 
 </body>
