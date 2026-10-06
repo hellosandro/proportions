@@ -313,7 +313,8 @@ body.rows .key[data-row="3"] { background: var(--row3); }
 body.rows .key[data-row="4"] { background: var(--row4); }
 body.rows .key.equal,
 body.rows .key.equal.active { background: var(--row-eq); }
-body.rows .key { color: var(--row-text); }
+body.rows .key,
+body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 
 /* DESKTOP: fields on the left half; right half = result (2/6) + keypad (4/6) */
 @media (min-width: 900px) {
@@ -1000,7 +1001,7 @@ const THEMES = {
     '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
   grafite: { name: 'Grafite', colors: {
-    '--bg-fields':'#2E303C','--equal':'#CFD6DF','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+    '--bg-fields':'#EDEDED','--equal':'#7B838E','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   notte: { name: 'Notte', colors: {
     '--bg-fields':'#141414','--equal':'#8E8E93','--icon-bg':'#2C2C2E','--icon':'#FFFFFF','--field-active':'#A5A5A5','--field-active-border':'#A5A5A5','--text-active':'#000000','--field-idle':'#242424','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#333333','--text-keys':'#FFFFFF','--key-blue':'#A5A5A5','--text-c':'#000000','--key-del':'#A5A5A5','--text-del':'#000000','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   carta: { name: 'Carta', colors: {
@@ -1018,9 +1019,9 @@ const THEMES = {
   neon: { name: 'Neon', colors: {
     '--bg-fields':'#000000','--equal':'#12B08C','--icon-bg':'#262626','--icon':'#12B08C','--field-active':'#DCDCDC','--field-active-border':'#DCDCDC','--text-active':'#000000','--field-idle':'#262626','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#CF2BB6','--text-keys':'#FFFFFF','--key-blue':'#12B08C','--text-c':'#FFFFFF','--key-del':'#12B08C','--text-del':'#FFFFFF','--equal-off':'#0B5E4B','--equal-active':'#12B08C','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   arcobaleno: { name: 'Arcobaleno', rows: true, colors: {
-    '--bg-fields':'#9355E6','--equal':'#FFFFFF','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#9355E6','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#E84D24','--text-equal':'#FFFFFF','--row1':'#3177DB','--row2':'#30B498','--row3':'#DEB121','--row4':'#DA2521','--row-eq':'#E84D24','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+    '--bg-fields':'#F0F0F0','--equal':'#A673EA','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#242324','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#F77C18','--text-equal':'#FFFFFF','--row1':'#2B90EE','--row2':'#35D0AE','--row3':'#F9C415','--row4':'#FB3F3C','--row-eq':'#F77C18','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   lilla: { name: 'Lilla', rows: true, colors: {
-    '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9CDBF','--field-active-border':'#C9CDBF','--text-active':'#1E1E1E','--field-idle':'#DDD0EE','--text-idle':'#4A3A5A','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#3A2A4E','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
+    '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9E784','--field-active-border':'#C9E784','--text-active':'#192405','--field-idle':'#DDD0EE','--text-idle':'#8756C2','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#FFFFFF','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
 };
 
 let currentTheme = 'pop';
