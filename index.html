@@ -606,7 +606,9 @@ body.rows .key { color: var(--row-text); }
   cursor: pointer;
 }
 .tuner button.secondary { background: #E6E6E6; color: #111; }
-.tuner .tuner-step { padding: 0; font-size: 22px; background: #E6E6E6; color: #111; }
+.tuner-parts { display: flex; gap: 4px; flex: none; }
+.tuner-parts button { padding: 0 12px; }
+.tuner-parts button.on { background: #111; color: #fff; }
 .tuner .tuner-close { padding: 0; font-size: 22px; }
 
 /* While the bar is open, phones give it room: the fields area starts lower and
@@ -1073,47 +1075,75 @@ document.getElementById('settingsClose').addEventListener('click', closeSettings
 settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
 
 // COLOR TUNER — opened from "Modifica colori" in the settings, or with ?colori in the address.
-// A compact bar at the top: pick one element (menu or ◀ ▶), set its color.
+// A compact bar at the top. Tap any part of the app to select it (or use the
+// menu), pick what to color (fill, text, border) and set the color.
 // On phones the app shrinks a little to make room, so nothing is covered.
+function tunerGroups(){
+  const rows = document.body.classList.contains('rows');
+  const g = [
+    {id:'fields-bg', label:'Sfondo campi',       parts:[['Fondo','--bg-fields']]},
+    {id:'bars',      label:'Barre e segno =',    parts:[['Colore','--equal']]},
+    {id:'active',    label:'Campo attivo',       parts:[['Fondo','--field-active'],['Numero','--text-active'],['Bordo','--field-active-border']]},
+    {id:'idle',      label:'Campi non attivi',   parts:[['Fondo','--field-idle'],['Numero','--text-idle']]},
+    {id:'badge',     label:'Bollo impostazioni', parts:[['Fondo','--icon-bg'],['Icona','--icon']]},
+    {id:'kbd-bg',    label:'Sfondo tastiera',    parts:[['Fondo','--bg']]},
+    {id:'result',    label:'Risultato grande',   parts:[['Testo','--text-result']]}
+  ];
+  if(rows){
+    g.push(
+      {id:'row1', label:'Riga 7 8 9 C',   parts:[['Fondo','--row1'],['Testo','--row-text']]},
+      {id:'row2', label:'Riga 4 5 6 DEL', parts:[['Fondo','--row2'],['Testo','--row-text']]},
+      {id:'row3', label:'Riga 1 2 3',     parts:[['Fondo','--row3'],['Testo','--row-text']]},
+      {id:'row4', label:'Riga +/- 0 ,',   parts:[['Fondo','--row4'],['Testo','--row-text']]},
+      {id:'eq',   label:'Tasto =',        parts:[['Fondo','--row-eq'],['Testo','--row-text']]}
+    );
+  } else {
+    g.push(
+      {id:'keys', label:'Tasti numeri', parts:[['Fondo','--key'],['Cifre','--text-keys']]},
+      {id:'c',    label:'Tasto C',      parts:[['Fondo','--key-blue'],['Testo','--text-c']]},
+      {id:'del',  label:'Tasto DEL',    parts:[['Fondo','--key-del'],['Testo','--text-del']]},
+      {id:'eq',   label:'Tasto =', parts:[['Fondo','--equal-active'],['Testo','--text-equal']]}
+    );
+  }
+  return g;
+}
+
+// Which group a tap on the app belongs to
+function tunerTarget(el){
+  const rows = document.body.classList.contains('rows');
+  const key = el.closest('.key');
+  if(key){
+    if(key.classList.contains('equal')) return 'eq';
+    if(rows) return 'row' + key.dataset.row;
+    if(key.dataset.action === 'clear') return 'c';
+    if(key.dataset.action === 'del') return 'del';
+    return 'keys';
+  }
+  const field = el.closest('.field');
+  if(field){
+    if(field.classList.contains('computed')) return 'eq';
+    return field.classList.contains('active') ? 'active' : 'idle';
+  }
+  if(el.closest('.bar, .equal-top')) return 'bars';
+  if(el.closest('.settings-btn')) return 'badge';
+  if(el.closest('#result')) return 'result';
+  if(el.closest('.top')) return 'fields-bg';
+  return 'kbd-bg';
+}
+
 function openTuner(){
   if(document.querySelector('.tuner')) return;
   const params = new URLSearchParams(location.search);
+  const groups = tunerGroups();
+  const allVars = [...new Set(groups.flatMap(g=> g.parts.map(p=> p[1])))];
+  const labelOf = v => { for(const g of groups) for(const [n,x] of g.parts) if(x===v) return g.label + (g.parts.length>1 ? ' – ' + n.toLowerCase() : ''); return v; };
 
-  const vars = [
-    ['--bg-fields',    'Sfondo campi'],
-    ['--equal',        'Barre e segno ='],
-    ['--icon-bg',      'Bollo impostazioni'],
-    ['--icon',         'Icona impostazioni'],
-    ['--field-active', 'Campo attivo'],
-    ['--field-active-border', 'Bordo campo attivo'],
-    ['--text-active',  'Numero nel campo attivo'],
-    ['--field-idle',   'Campi non attivi'],
-    ['--text-idle',    'Numeri nei campi non attivi'],
-    ['--bg',           'Sfondo tastiera'],
-    ['--text-result',  'Risultato'],
-    ['--key',          'Tasti numeri'],
-    ['--text-keys',    'Cifre sui tasti'],
-    ['--key-blue',     'Tasto C'],
-    ['--text-c',       'Testo tasto C'],
-    ['--key-del',      'Tasto DEL'],
-    ['--text-del',     'Testo tasto DEL'],
-    ['--equal-active', 'Tasto ='],
-    ['--text-equal',   'Testo tasto =']
-  ];
-  if(document.body.classList.contains('rows')) vars.push(
-    ['--row1',         'Riga 7 8 9 C'],
-    ['--row2',         'Riga 4 5 6 DEL'],
-    ['--row3',         'Riga 1 2 3'],
-    ['--row4',         'Riga +/- 0 ,'],
-    ['--row-eq',       'Tasto = (righe)'],
-    ['--row-text',     'Testo tasti (righe)']
-  );
   const root = document.documentElement;
   const current = v => getComputedStyle(root).getPropertyValue(v).trim().toUpperCase();
   const themeValue = v => ((THEMES[currentTheme] || THEMES.pop).colors[v] || '').toUpperCase();
 
   // Colors passed in the address (e.g. ?colori&bg-fields=4D4DFF) override the theme
-  vars.forEach(([v])=>{
+  allVars.forEach(v=>{
     const p = params.get(v.slice(2));
     if(p && /^[0-9a-f]{6}$/i.test(p)) root.style.setProperty(v, '#'+p.toUpperCase());
   });
@@ -1122,9 +1152,8 @@ function openTuner(){
   panel.className = 'tuner';
   panel.innerHTML =
     '<div class="tuner-line">' +
-      '<button type="button" class="tuner-step" aria-label="Precedente">‹</button>' +
-      '<select class="tuner-select"></select>' +
-      '<button type="button" class="tuner-step" aria-label="Successivo">›</button>' +
+      '<select class="tuner-select" aria-label="Elemento"></select>' +
+      '<div class="tuner-parts"></div>' +
     '</div>' +
     '<div class="tuner-line">' +
       '<input type="color" class="tuner-picker">' +
@@ -1134,48 +1163,74 @@ function openTuner(){
       '<button type="button" class="secondary tuner-close" aria-label="Chiudi">×</button>' +
     '</div>';
   const select = panel.querySelector('.tuner-select');
-  const [prevBtn, nextBtn] = panel.querySelectorAll('.tuner-step');
+  const partsBox = panel.querySelector('.tuner-parts');
   const picker = panel.querySelector('.tuner-picker');
   const hex = panel.querySelector('.tuner-hex');
-  vars.forEach(([v,label])=>{
+  groups.forEach(g=>{
     const o = document.createElement('option');
-    o.value = v; o.textContent = label;
+    o.value = g.id; o.textContent = g.label;
     select.appendChild(o);
   });
+
+  let group = groups[0];
+  let variable = group.parts[0][1];
 
   function syncAddress(){
     const q = new URLSearchParams();
     q.set('colori','');
-    vars.forEach(([v])=>{ if(current(v)!==themeValue(v)) q.set(v.slice(2), current(v).slice(1)); });
+    allVars.forEach(v=>{ if(current(v)!==themeValue(v)) q.set(v.slice(2), current(v).slice(1)); });
     history.replaceState(null, '', '?' + q.toString().replace('colori=','colori'));
   }
   function show(){
-    const val = current(select.value);
+    const val = current(variable);
     picker.value = val.toLowerCase();
     hex.value = val;
+    partsBox.querySelectorAll('button').forEach(b=> b.classList.toggle('on', b.dataset.v===variable));
+  }
+  function choose(id, keepPart){
+    const g = groups.find(x=> x.id===id) || groups[0];
+    const sameKind = keepPart && g.parts.find(p=> p[0]===keepPart);
+    group = g;
+    variable = (sameKind || g.parts[0])[1];
+    select.value = g.id;
+    partsBox.innerHTML = '';
+    if(g.parts.length > 1) g.parts.forEach(([name,v])=>{
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'secondary';
+      b.dataset.v = v;
+      b.textContent = name;
+      b.addEventListener('click', ()=>{ variable = v; show(); });
+      partsBox.appendChild(b);
+    });
+    show();
   }
   function set(val){
-    root.style.setProperty(select.value, val);
+    root.style.setProperty(variable, val);
     show();
     syncAddress();
   }
-  function step(d){
-    select.selectedIndex = (select.selectedIndex + d + vars.length) % vars.length;
-    show();
-  }
 
-  select.addEventListener('change', show);
-  prevBtn.addEventListener('click', ()=> step(-1));
-  nextBtn.addEventListener('click', ()=> step(1));
+  select.addEventListener('change', ()=> choose(select.value));
   picker.addEventListener('input', ()=> set(picker.value.toUpperCase()));
   hex.addEventListener('change', ()=>{
     const val = hex.value.trim().replace(/^#?/, '#').toUpperCase();
     if(/^#[0-9A-F]{6}$/.test(val)) set(val); else show();
   });
 
+  // Tap anything in the app to select it (instead of typing or calculating)
+  const pick = e=>{
+    if(e.target.closest('.tuner, .settings')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const currentPart = (group.parts.find(p=> p[1]===variable) || [''])[0];
+    choose(tunerTarget(e.target), currentPart);
+  };
+  document.addEventListener('click', pick, true);
+
   const copyBtn = panel.querySelector('.tuner-copy');
   copyBtn.addEventListener('click', ()=>{
-    const text = vars.map(([v,label])=> label + ': ' + current(v)).join('\n') + '\n\n' + location.href;
+    const text = allVars.map(v=> labelOf(v) + ': ' + current(v)).join('\n') + '\n\n' + location.href;
     navigator.clipboard.writeText(text).then(()=>{
       copyBtn.textContent = 'Copiati!';
       setTimeout(()=> copyBtn.textContent = 'Copia', 1500);
@@ -1183,6 +1238,7 @@ function openTuner(){
   });
   panel.querySelector('.tuner-reset').addEventListener('click', ()=> applyTheme(currentTheme));
   panel.querySelector('.tuner-close').addEventListener('click', ()=>{
+    document.removeEventListener('click', pick, true);
     panel.remove();
     window.refreshTuner = null;
     document.body.classList.remove('tuning');
@@ -1192,7 +1248,8 @@ function openTuner(){
 
   // Keep the bar in sync when a theme is picked in the settings
   window.refreshTuner = ()=>{ show(); syncAddress(); };
-  window.refreshTuner();
+  choose(groups[0].id);
+  syncAddress();
 
   document.body.appendChild(panel);
   document.body.classList.add('tuning');
