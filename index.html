@@ -109,6 +109,9 @@ body {
   .top .settings-btn {
     left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
   }
+  .top .palette-btn {
+    left: calc(round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px) + var(--k) / 2 + 8px);
+  }
 }
 
 .field {
@@ -372,7 +375,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 
 /* SETTINGS: button in the top-left corner of the fields area, panel as a sheet */
-.settings-btn {
+.settings-btn, .palette-btn {
   position: absolute;
   top: calc(16px + env(safe-area-inset-top));
   left: 16px;
@@ -387,10 +390,11 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   color: var(--icon, var(--text-fields));
   cursor: pointer;
 }
-.settings-btn svg { width: 55%; height: 55%; }
-.settings-btn:active { opacity: 0.6; }
-.settings-btn:focus { outline: none; }
-.settings-btn:focus-visible { outline: 1.5px solid currentColor; }
+.palette-btn { left: calc(16px + var(--k) / 2 + 8px); }   /* right next to settings */
+.settings-btn svg, .palette-btn svg { width: 55%; height: 55%; }
+.settings-btn:active, .palette-btn:active { opacity: 0.6; }
+.settings-btn:focus, .palette-btn:focus { outline: none; }
+.settings-btn:focus-visible, .palette-btn:focus-visible { outline: 1.5px solid currentColor; }
 
 .settings {
   position: fixed;
@@ -554,6 +558,10 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 .switch-row[aria-checked="true"] .switch::after { transform: translateX(20px); }
 /* while the theme list is open, only the list is shown */
 .settings-card.picking .settings-more { display: none; }
+/* opened from the palette button: just the list of themes */
+.settings-card.palette-only .colors-head,
+.settings-card.palette-only .theme-picker { display: none; }
+.settings-card.palette-only .themes { margin-top: 0; }
 .wordmark {
   display: inline-block;
   margin-bottom: 8px;
@@ -653,7 +661,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 /* While the bar is open, phones give it room: the fields area starts lower and
    the keys shrink to fit the remaining height */
 body.tuning { --tuner-h: 108px; }
-body.tuning .settings-btn { visibility: hidden; }
+body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
 @media (max-width: 899px) {
   /* the bar takes the badge's place: bar + 16px + two fields (2k + 24px) +
      24px + keypad (4.3k + 48px) = 6.3k + 112px + bar */
@@ -673,6 +681,12 @@ body.tuning .settings-btn { visibility: hidden; }
 
 <!-- TOP GRID: a/b = c/d  (f0 = a, f2 = b, f1 = c, f3 = d) -->
 <div class="top">
+  <button class="palette-btn" id="paletteBtn" type="button" aria-label="Colors">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="7.5" cy="7.5" r="3"/><circle cx="16.5" cy="7.5" r="3"/>
+      <circle cx="7.5" cy="16.5" r="3"/><circle cx="16.5" cy="16.5" r="3"/>
+    </svg>
+  </button>
   <button class="settings-btn" id="settingsBtn" type="button" aria-label="Settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <line x1="3" y1="7" x2="21" y2="7"/><circle cx="15" cy="7" r="2.5" fill="var(--icon-bg)"/>
@@ -719,10 +733,10 @@ body.tuning .settings-btn { visibility: hidden; }
 <div class="settings" id="settings" aria-hidden="true">
   <div class="settings-card" role="dialog" aria-label="Settings">
     <div class="settings-head">
-      <h2>Settings</h2>
+      <h2 id="settingsTitle">Settings</h2>
       <button class="settings-close" id="settingsClose" type="button" aria-label="Close">×</button>
     </div>
-    <h3>Colors</h3>
+    <h3 class="colors-head">Colors</h3>
     <button class="theme theme-picker" id="themePicker" type="button" aria-expanded="false"></button>
     <div class="themes" id="themes"></div>
     <div class="settings-more">
@@ -1114,6 +1128,7 @@ Object.entries(THEMES).forEach(([id,t])=>{
     applyTheme(id);
     try { localStorage.setItem('proportions-theme', id); } catch(e) {}
     toggleThemes(false);
+    if(paletteOnly) closeSettings();
   });
   themesBox.appendChild(b);
 });
@@ -1121,15 +1136,32 @@ applyTheme(savedTheme);
 
 // SETTINGS PANEL
 const settingsPanel = document.getElementById('settings');
+let paletteOnly = false;   // opened from the palette button: just the theme list
 function openSettings(){
   settingsPanel.classList.add('open');
   settingsPanel.setAttribute('aria-hidden','false');
 }
+function openPalette(){
+  paletteOnly = true;
+  document.getElementById('settingsTitle').textContent = 'Colors';
+  document.querySelector('.settings-card').classList.add('palette-only');
+  toggleThemes(true);
+  openSettings();
+}
 function closeSettings(){
   settingsPanel.classList.remove('open');
   settingsPanel.setAttribute('aria-hidden','true');
+  if(paletteOnly){
+    paletteOnly = false;
+    toggleThemes(false);
+    setTimeout(()=>{
+      document.getElementById('settingsTitle').textContent = 'Settings';
+      document.querySelector('.settings-card').classList.remove('palette-only');
+    }, 200);
+  }
 }
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('paletteBtn').addEventListener('click', openPalette);
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
 settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
 
@@ -1184,7 +1216,7 @@ function tunerTarget(el){
     return field.classList.contains('active') ? 'active' : 'idle';
   }
   if(el.closest('.bar, .equal-top')) return 'bars';
-  if(el.closest('.settings-btn')) return 'badge';
+  if(el.closest('.settings-btn, .palette-btn')) return 'badge';
   if(el.closest('#result')) return 'result';
   if(el.closest('.top')) return 'fields-bg';
   return 'kbd-bg';
