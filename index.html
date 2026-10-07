@@ -498,7 +498,6 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 .theme.selected { border-color: #111; }
 .theme-swatch {
   flex: none;
-  width: 164px;   /* room for 6 dots, so every name starts on the same column */
   display: flex;
   gap: 4px;
 }
@@ -1121,8 +1120,7 @@ function themeLabel(t){
   const strip = t.rows
     ? [c['--bg-fields'], c['--row1'], c['--row2'], c['--row3'], c['--row-eq'], c['--row4']]
     : [c['--bg-fields'], c['--field-active'], c['--key'], c['--key-blue'], c['--key-del'], c['--equal-active']];
-  const dots = [...new Set(strip.map(x=> x.toUpperCase()))];   // one dot per color
-  return '<span class="theme-swatch">' + dots.map(x=>'<span style="background:'+x+'"></span>').join('') + '</span>' + t.name;
+  return '<span class="theme-swatch">' + strip.map(x=>'<span style="background:'+x+'"></span>').join('') + '</span>' + t.name;
 }
 function toggleThemes(open){
   themesBox.classList.toggle('open', open);
