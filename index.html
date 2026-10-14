@@ -281,6 +281,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* the delete-one-digit key: a drawn ⌫, about as heavy as the digits */
+.key[data-action="clear"] svg {
+  width: calc(var(--k) * 0.4);
+  height: calc(var(--k) * 0.4);
+  display: block;
+}
+
 .key[data-action="del"] {
   font-size: calc(var(--k) * 0.3);
 }
@@ -761,7 +768,7 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
   <div class="key">7</div>
   <div class="key">8</div>
   <div class="key">9</div>
-  <div class="key blue" data-action="clear">C</div>
+  <div class="key blue" data-action="clear" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6.5-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div>
 
   <div class="key">4</div>
   <div class="key">5</div>
