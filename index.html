@@ -979,9 +979,34 @@ keyboard.addEventListener('pointerdown', e=>{
   if(!k) return;
   e.preventDefault();
   k.classList.add('pressed');
+  if(k.dataset.action === 'clear'){ pressClear(k); return; }
   setTimeout(()=> k.classList.remove('pressed'), 120);
   handleKey(k);
 });
+
+// C: a tap deletes the last digit, a long press (half a second) clears the field
+let clearTimer = null;
+function pressClear(k){
+  clearTimer = setTimeout(()=>{
+    clearTimer = null;
+    k.classList.remove('pressed');
+    editActive(()=> '');
+    updateLive();
+  }, 500);
+  const release = ()=>{
+    window.removeEventListener('pointerup', release);
+    window.removeEventListener('pointercancel', release);
+    k.classList.remove('pressed');
+    if(clearTimer){
+      clearTimeout(clearTimer);
+      clearTimer = null;
+      editActive(t=> t.slice(0, -1));
+      updateLive();
+    }
+  };
+  window.addEventListener('pointerup', release);
+  window.addEventListener('pointercancel', release);
+}
 
 // DEL clears everything, so it asks first
 const confirmPanel = document.getElementById('confirm');
