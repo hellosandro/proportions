@@ -45,6 +45,7 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 html {
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;   /* no double-tap zoom: quick taps register at once */
   background: var(--bg);
   overflow: hidden;
   height: 100%;
@@ -244,6 +245,7 @@ body {
 }
 
 .keyboard {
+  touch-action: none;        /* no zoom or scroll gestures: every touch is a key press */
   display: grid;
   grid-template-columns: repeat(4, var(--k));
   grid-template-rows: repeat(4, var(--k));
@@ -305,8 +307,14 @@ body {
   background: var(--equal-active);
 }
 
-.key:active {
-  filter: brightness(0.95);
+.key.pressed {
+  filter: brightness(0.9);
+}
+
+/* DEL waiting for the second tap */
+.key.blue[data-action="del"].confirm {
+  background: var(--text-del);
+  color: var(--key-del);
 }
 
 /* ROW THEMES: each keypad row has its own color (e.g. Arcobaleno) */
@@ -867,15 +875,17 @@ function activate(f){
   replaceOnType = false;
   hideResult();
 
+  // Tapping a number you typed just edits it: the result stays the unknown and
+  // follows your edits. Only tapping the result itself turns it into a value.
   const hasResult = liveIndex !== null && isFinite(lastResult) && (solved || liveMode);
-  if(hasResult && partner(i) !== liveIndex){
+  if(i === liveIndex && hasResult){
     // keep the result as the value of its field, and make the partner the unknown
     const r = fields[liveIndex];
     r.classList.remove('unknown', 'computed');
     r.innerText = formatNumber(lastResult);
     r.dataset.exact = lastResult;
     r.dataset.shown = r.innerText;
-    if(i === liveIndex) replaceOnType = true;  // typing in it starts a new number
+    replaceOnType = true;                      // typing in it starts a new number
     liveIndex = partner(i);
     fields[liveIndex].innerText = '';
   } else if(i === liveIndex){
@@ -905,10 +915,41 @@ function editActive(fn){
 
 fields.forEach(f=> f.addEventListener('click', ()=> activate(f)));
 
-// KEYBOARD INPUT
-document.querySelectorAll('.key').forEach(k=>{
-  k.addEventListener('click', ()=> handleKey(k));
+// KEYBOARD INPUT — keys respond as soon as the finger touches down (a "click"
+// waits for the finger to lift and is lost if it moves a little or taps twice
+// fast). A touch on a key's round corner or in the gap goes to the nearest key.
+const keys = [...keyboard.querySelectorAll('.key')];
+function nearestKey(x, y){
+  let best = null, bestD = Infinity;
+  keys.forEach(k=>{
+    const r = k.getBoundingClientRect();
+    const dx = Math.max(r.left - x, 0, x - r.right);
+    const dy = Math.max(r.top - y, 0, y - r.bottom);
+    const d = dx*dx + dy*dy;
+    if(d < bestD){ bestD = d; best = k; }
+  });
+  return best;
+}
+keyboard.addEventListener('pointerdown', e=>{
+  if(e.button > 0) return;
+  const k = nearestKey(e.clientX, e.clientY);
+  if(!k) return;
+  e.preventDefault();
+  k.classList.add('pressed');
+  setTimeout(()=> k.classList.remove('pressed'), 120);
+  handleKey(k);
 });
+
+// DEL clears everything, so it asks first: the first tap shows "OK?",
+// a second tap clears. Any other key (or 2.5 seconds) cancels.
+const delKey = keyboard.querySelector('[data-action="del"]');
+let delTimer = null;
+function cancelDel(){
+  clearTimeout(delTimer);
+  delTimer = null;
+  delKey.classList.remove('confirm');
+  delKey.innerText = 'DEL';
+}
 
 function handleKey(k){
   const val = k.innerText;
@@ -916,7 +957,16 @@ function handleKey(k){
 
   if(!act) typeChar(val);
   if(act==="clear") editActive(()=> "");
-  if(act==="del") clearAll();
+  if(act!=="del" && delTimer) cancelDel();
+  if(act==="del"){
+    if(delTimer){ cancelDel(); clearAll(); }
+    else if([...fields].some(f=> f.innerText !== '')){
+      delKey.classList.add('confirm');
+      delKey.innerText = 'OK?';
+      delTimer = setTimeout(cancelDel, 2500);
+    }
+    return;
+  }
   if(act==="sign") toggleSign();
   if(act==="equal"){ calculate(); return; }
 
