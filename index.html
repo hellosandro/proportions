@@ -1212,7 +1212,7 @@ function themeLabel(t){
 }
 function toggleThemes(open){
   themesBox.classList.toggle('open', open);
-  document.querySelector('.settings-card').classList.toggle('picking', open);
+  document.querySelector('#settings .settings-card').classList.toggle('picking', open);
   themePicker.setAttribute('aria-expanded', open);
 }
 themePicker.addEventListener('click', ()=> toggleThemes(!themesBox.classList.contains('open')));
@@ -1242,7 +1242,7 @@ function openSettings(){
 function openPalette(){
   paletteOnly = true;
   document.getElementById('settingsTitle').textContent = 'Colors';
-  document.querySelector('.settings-card').classList.add('palette-only');
+  document.querySelector('#settings .settings-card').classList.add('palette-only');
   toggleThemes(true);
   openSettings();
 }
@@ -1254,7 +1254,7 @@ function closeSettings(){
     toggleThemes(false);
     setTimeout(()=>{
       document.getElementById('settingsTitle').textContent = 'Settings';
-      document.querySelector('.settings-card').classList.remove('palette-only');
+      document.querySelector('#settings .settings-card').classList.remove('palette-only');
     }, 200);
   }
 }
