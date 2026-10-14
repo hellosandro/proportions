@@ -311,11 +311,6 @@ body {
   filter: brightness(0.9);
 }
 
-/* DEL waiting for the second tap */
-.key.blue[data-action="del"].confirm {
-  background: var(--text-del);
-  color: var(--key-del);
-}
 
 /* ROW THEMES: each keypad row has its own color (e.g. Arcobaleno) */
 body.rows .key[data-row="1"] { background: var(--row1); }
@@ -441,6 +436,26 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   .settings { align-items: center; }
   .settings-card { border-radius: 28px; }
 }
+/* CONFIRM SHEET — same look as the settings sheet */
+.confirm-card h2 { margin-bottom: 20px; }
+.confirm-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.confirm-buttons button {
+  padding: 14px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #F4F4F4;
+  color: #111;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 300;
+  cursor: pointer;
+}
+.confirm-buttons .primary { background: #111; color: #FFF; }
+.confirm-buttons button:active { opacity: 0.7; }
 .settings-head {
   /* title and close button stay visible while the themes scroll */
   position: sticky;
@@ -746,6 +761,17 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
   <div class="key" data-decimal>,</div>
 </div>
 
+<!-- CONFIRM: clear all fields (DEL) -->
+<div class="settings confirm" id="confirm" aria-hidden="true">
+  <div class="settings-card confirm-card" role="alertdialog" aria-labelledby="confirmTitle">
+    <h2 id="confirmTitle">Clear all fields?</h2>
+    <div class="confirm-buttons">
+      <button type="button" id="confirmCancel">Cancel</button>
+      <button type="button" id="confirmOk" class="primary">Clear</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETTINGS -->
 <div class="settings" id="settings" aria-hidden="true">
   <div class="settings-card" role="dialog" aria-label="Settings">
@@ -940,16 +966,24 @@ keyboard.addEventListener('pointerdown', e=>{
   handleKey(k);
 });
 
-// DEL clears everything, so it asks first: the first tap shows "OK?",
-// a second tap clears. Any other key (or 2.5 seconds) cancels.
-const delKey = keyboard.querySelector('[data-action="del"]');
-let delTimer = null;
-function cancelDel(){
-  clearTimeout(delTimer);
-  delTimer = null;
-  delKey.classList.remove('confirm');
-  delKey.innerText = 'DEL';
+// DEL clears everything, so it asks first
+const confirmPanel = document.getElementById('confirm');
+let confirmOpenedAt = 0;   // the click that follows the DEL touch must not close it
+function askClearAll(){
+  if(![...fields].some(f=> f.innerText !== '')) return;   // nothing to clear
+  confirmPanel.classList.add('open');
+  confirmPanel.setAttribute('aria-hidden','false');
+  confirmOpenedAt = Date.now();
 }
+function closeConfirm(){
+  confirmPanel.classList.remove('open');
+  confirmPanel.setAttribute('aria-hidden','true');
+}
+document.getElementById('confirmOk').addEventListener('click', ()=>{ closeConfirm(); clearAll(); });
+document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+confirmPanel.addEventListener('click', e=>{
+  if(e.target===confirmPanel && Date.now() - confirmOpenedAt > 500) closeConfirm();
+});
 
 function handleKey(k){
   const val = k.innerText;
@@ -957,16 +991,7 @@ function handleKey(k){
 
   if(!act) typeChar(val);
   if(act==="clear") editActive(()=> "");
-  if(act!=="del" && delTimer) cancelDel();
-  if(act==="del"){
-    if(delTimer){ cancelDel(); clearAll(); }
-    else if([...fields].some(f=> f.innerText !== '')){
-      delKey.classList.add('confirm');
-      delKey.innerText = 'OK?';
-      delTimer = setTimeout(cancelDel, 2500);
-    }
-    return;
-  }
+  if(act==="del"){ askClearAll(); return; }
   if(act==="sign") toggleSign();
   if(act==="equal"){ calculate(); return; }
 
@@ -1046,6 +1071,11 @@ function clearAll(){
 document.addEventListener('keydown', e=>{
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(e.target.closest && e.target.closest('.tuner')) return;
+  if(confirmPanel.classList.contains('open')){
+    if(e.key==="Escape") closeConfirm();
+    if(e.key==="Enter"){ closeConfirm(); clearAll(); }
+    e.preventDefault(); return;
+  }
   if(document.getElementById('settings').classList.contains('open')){
     if(e.key==="Escape") closeSettings();
     return;
