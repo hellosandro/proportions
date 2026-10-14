@@ -293,6 +293,9 @@ body {
   transform: translateX(-5%);
 }
 
+/* dark labels: no lift (see markInk) */
+.key.ink-dark:not(.equal) { padding-bottom: 0; }
+
 .key[data-action="del"] {
   font-size: calc(var(--k) * 0.3);
 }
@@ -1240,7 +1243,18 @@ function applyTheme(id){
   document.querySelectorAll('.themes .theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
   const picker = document.getElementById('themePicker');
   if(picker) picker.innerHTML = themeLabel(theme);
+  markInk();
   if(window.refreshTuner) window.refreshTuner();
+}
+
+// Dark labels look higher than light ones on a round key (light ones glow and
+// spread), so keys with dark text drop the small lift. The = keeps its own.
+function markInk(){
+  keys.forEach(k=>{
+    const [r,g,b] = getComputedStyle(k).color.match(/\d+(\.\d+)?/g).map(Number);
+    const lum = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
+    k.classList.toggle('ink-dark', lum < 0.5);
+  });
 }
 
 let savedTheme = 'pop';
@@ -1456,6 +1470,7 @@ function openTuner(){
   }
   function set(val){
     root.style.setProperty(variable, val);
+    markInk();
     show();
     syncAddress();
   }
