@@ -472,7 +472,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   align-items: center;
   margin-bottom: 12px;
 }
-/* Type scale in the sheets: 22px titles, 17px items and wordmark, 13px notes */
+/* Type scale in the sheets: 22px titles, 20px wordmark, 17px items, 13px notes */
 .settings h2 {
   font-size: 22px;
   font-weight: 300;
@@ -602,10 +602,22 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 .settings-card:not(.palette-only) .themes { display: none; }
 .wordmark {
   font-family: 'Poppins', 'Inter', sans-serif;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1;
   color: #4D4DFF;      /* ORTION: Pop blue */
+}
+/* The letters hop in place, each at its own pace, like a crowd */
+.wordmark span {
+  display: inline-block;
+  animation: hop var(--t, 1.2s) ease-in-out var(--d, 0s) infinite;
+}
+@keyframes hop {
+  0%, 40%, 100% { transform: translateY(0); }
+  20%           { transform: translateY(-0.3em); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wordmark span { animation: none; }
 }
 .wordmark .p1 { color: #FF2BD6; }   /* Pop magenta */
 .wordmark .o1 { color: #22CC6E; }   /* Pop green */
@@ -793,7 +805,7 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
       <span class="switch" aria-hidden="true"></span>
     </button>
     <p class="credits">
-      <span class="wordmark" aria-label="POPortion"><span class="p1">P</span><span class="o1">O</span><span class="p2">P</span>ORTION</span><br>
+      <span class="wordmark" aria-label="POPortion"><span class="p1">P</span><span class="o1">O</span><span class="p2">P</span><span>O</span><span>R</span><span>T</span><span>I</span><span>O</span><span>N</span></span><br>
       Design by <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
       Typeface Inter by Rasmus Andersson
     </p>
@@ -1264,6 +1276,12 @@ function closeSettings(){
   }
 }
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
+
+// Each wordmark letter gets its own random rhythm, so they never hop in step
+document.querySelectorAll('.wordmark span').forEach(l=>{
+  l.style.setProperty('--t', (0.9 + Math.random()*0.7).toFixed(2) + 's');
+  l.style.setProperty('--d', (-Math.random()*2).toFixed(2) + 's');
+});
 document.getElementById('paletteBtn').addEventListener('click', openPalette);
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
 settingsPanel.addEventListener('click', e=>{ if(e.target===settingsPanel) closeSettings(); });
