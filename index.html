@@ -378,14 +378,14 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     padding-bottom: 0;
     background: var(--bg-fields);
   }
-  /* the right half (result + keypad) is a panel with the sheets' rounded
-     corners (28px) on the side that meets the fields */
+  /* the right half (result + keypad) is a panel with rounded corners on the
+     side that meets the fields: twice the sheets' 28px, for the larger screen */
   body::before {
     content: "";
     grid-column: 2;
     grid-row: 1 / span 2;
     background: var(--bg);
-    border-radius: 28px 0 0 28px;
+    border-radius: 56px 0 0 56px;
   }
 
   .top {
