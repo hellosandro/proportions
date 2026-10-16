@@ -376,6 +376,16 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 2fr 4fr;
     padding-bottom: 0;
+    background: var(--bg-fields);
+  }
+  /* the right half (result + keypad) is a panel with the sheets' rounded
+     corners (28px) on the side that meets the fields */
+  body::before {
+    content: "";
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    background: var(--bg);
+    border-radius: 28px 0 0 28px;
   }
 
   .top {
@@ -398,6 +408,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.18s ease-out;
+    background: none;   /* the rounded panel behind shows through */
   }
 
   .result.show {
