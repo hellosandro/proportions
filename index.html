@@ -11,13 +11,26 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="POPortion">
 <meta name="theme-color" content="#F2FBE3">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;700&display=swap">
-<!-- Poppins ExtraBold, only the letters of the POPORTION wordmark -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&text=POPRTIN&display=swap">
+<!-- Fonts live next to the page, so the app also works offline -->
+<link rel="preload" href="fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 
 <style>
+/* Inter (variable, Light to Bold) and Poppins ExtraBold, only the letters of
+   the POPORTION wordmark. Both from Google Fonts, SIL Open Font License. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(fonts/inter-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(fonts/poppins-800-wordmark.woff2) format('woff2');
+}
 :root {
   /* Pop palette (chosen with the ?colori tuner) */
   --bg: #4D4DFF;            /* keypad area: electric blue */
@@ -1525,6 +1538,11 @@ setMode(liveMode);
 
 const tunerParams = new URLSearchParams(location.search);
 if(tunerParams.has('colors') || tunerParams.has('colori')) openTuner();
+
+// OFFLINE: a service worker keeps a copy of the app on the phone
+if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
 </script>
 
 </body>
