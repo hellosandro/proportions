@@ -101,7 +101,10 @@ body {
     justify-content: flex-start;
     padding-left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     align-items: flex-end;
-    padding-bottom: 24px;
+    /* the fields area runs 28px under the keypad, whose top corners are
+       rounded like the sheets (28px) */
+    padding-bottom: calc(24px + 28px);
+    margin-bottom: -28px;
     /* keep the settings badge clear of the first field */
     padding-top: calc(16px + var(--k) / 2 + 12px + env(safe-area-inset-top));
   }
@@ -242,6 +245,16 @@ body.rows .field.computed {
 
 .result.show {
   transform: translateY(0);
+}
+
+/* Phones: the keypad area has the sheets' rounded top corners */
+@media (max-width: 899px) {
+  .keyboard, .result {
+    background: var(--bg);
+    border-radius: 28px 28px 0 0;
+  }
+  .keyboard { position: relative; z-index: 1; }
+  .result { z-index: 2; }
 }
 
 /* KEYPAD: round keys. --k is the key size, --gap the space between keys.
