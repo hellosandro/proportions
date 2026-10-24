@@ -620,8 +620,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .switch-row small { display: block; font-size: 13px; opacity: 0.55; }
-/* MODE: proportion or calculator, two buttons side by side at the top of the
-   settings; the chosen one is dark */
+/* MODE: proportion or calculator, two square-ish tiles side by side at the
+   top of the settings, a drawn icon over the name; the chosen one is dark */
 .mode-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -629,9 +629,15 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   margin-bottom: 16px;
 }
 .mode-switch button {
-  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  aspect-ratio: 4 / 3;
+  padding: 12px;
   border: none;
-  border-radius: 999px;
+  border-radius: 18px;
   background: #F4F4F4;
   color: #111;
   font: inherit;
@@ -639,6 +645,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   font-weight: 300;
   cursor: pointer;
 }
+.mode-switch svg { width: 40px; height: 40px; display: block; }
 .mode-switch button[aria-checked="true"] { background: #111; color: #FFF; }
 .mode-switch button:active { opacity: 0.7; }
 /* iOS-style toggle */
@@ -1037,8 +1044,28 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
     <div class="themes" id="themes"></div>
     <div class="settings-more">
     <div class="mode-switch" role="radiogroup" aria-label="Mode">
-      <button type="button" role="radio" data-mode="proportion" aria-checked="true">Proportion</button>
-      <button type="button" role="radio" data-mode="calc" aria-checked="false">Calculator</button>
+      <button type="button" role="radio" data-mode="proportion" aria-checked="true">
+        <!-- the proportion: four pills, two fraction bars and = -->
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true">
+          <rect x="2" y="5" width="11" height="7" rx="3.5"/><rect x="19" y="5" width="11" height="7" rx="3.5"/>
+          <rect x="2" y="20" width="11" height="7" rx="3.5"/><rect x="19" y="20" width="11" height="7" rx="3.5"/>
+          <line x1="4.5" y1="16" x2="10.5" y2="16"/><line x1="21.5" y1="16" x2="27.5" y2="16"/>
+          <line x1="14.5" y1="14.75" x2="17.5" y2="14.75"/><line x1="14.5" y1="17.25" x2="17.5" y2="17.25"/>
+        </svg>
+        Proportion
+      </button>
+      <button type="button" role="radio" data-mode="calc" aria-checked="false">
+        <!-- the calculator: body, display, keys -->
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true">
+          <rect x="7" y="2" width="18" height="28" rx="4"/><line x1="11" y1="8" x2="21" y2="8"/>
+          <g fill="currentColor" stroke="none">
+            <circle cx="11.5" cy="14.5" r="1.3"/><circle cx="16" cy="14.5" r="1.3"/><circle cx="20.5" cy="14.5" r="1.3"/>
+            <circle cx="11.5" cy="19.5" r="1.3"/><circle cx="16" cy="19.5" r="1.3"/><circle cx="20.5" cy="19.5" r="1.3"/>
+            <circle cx="11.5" cy="24.5" r="1.3"/><circle cx="16" cy="24.5" r="1.3"/><circle cx="20.5" cy="24.5" r="1.3"/>
+          </g>
+        </svg>
+        Calculator
+      </button>
     </div>
     <button class="switch-row" id="liveSwitch" type="button" role="switch" aria-checked="true">
       <span>Live result<small>Shows the result as you type</small></span>
