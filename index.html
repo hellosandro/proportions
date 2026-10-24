@@ -618,6 +618,18 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .switch-row small { display: block; font-size: 13px; opacity: 0.55; }
+/* the link to the other app: a chevron where the toggle would be */
+.app-link { text-decoration: none; }
+.app-link::after {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-right: 4px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+}
 /* iOS-style toggle */
 .switch {
   flex: none;
@@ -856,6 +868,9 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
       <span>Live result<small>Shows the result as you type</small></span>
       <span class="switch" aria-hidden="true"></span>
     </button>
+    <a class="switch-row app-link" href="calculator.html">
+      <span>Calculator<small>12 × 3 + 4</small></span>
+    </a>
     <p class="credits">
       <span class="wordmark" aria-label="POPortion"><span class="p1">P</span><span class="o1">O</span><span class="p2">P</span><span>O</span><span>R</span><span>T</span><span>I</span><span>O</span><span>N</span></span><br>
       Design by <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
