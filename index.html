@@ -798,10 +798,13 @@ body.tuning .settings-btn, body.tuning .palette-btn, body.tuning .mode-btn { vis
   }
 }
 
-/* CALCULATOR MODE: the same app as a calculator. Two pills, one above the other
-     [ 12 × 3 + 4 ]   the calculation, where you type
-     [ 40         ]   the result
-   and a keypad of five rows, with the operators in the column of =  */
+/* CALCULATOR MODE: the same app as a calculator, with the color logic of the
+   iPhone calculator: one background, the top row (⌫ DEL %) in one color, the
+   digits in another, the operators in the color of =. No pills: the
+   calculation is written straight on the background, right-aligned
+                                 12 × 3 + 4    big, where you type
+                                       = 40    small: the live result
+   and after = the two lines swap sizes: the calculation small, the result big */
 .calc-grid, .calc-keys { display: none; }
 body.calc .grid, body.calc #keyboard { display: none; }
 body.calc .calc-grid, body.calc .calc-keys { display: grid; }
@@ -810,9 +813,51 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   /* as wide as the two proportion columns */
   --w: min(596px, calc(100vw - 32px));
   grid-template-columns: var(--w);
-  row-gap: 24px;
+  row-gap: calc(var(--k) * 0.06);
 }
-.calc-grid .field { min-width: 0; overflow: hidden; }
+body.calc, body.calc .top { background: var(--bg); }
+/* the round buttons at the top take the colors of the top row of keys */
+body.calc { --icon-bg: var(--key-blue); --icon: var(--text-c); }
+.calc-grid .field {
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  overflow: hidden;
+  justify-content: flex-end;
+  background: none;
+  border-radius: 0;
+  color: var(--text-result);
+  font-size: calc(var(--k) * 0.95);
+  line-height: 1.15;
+  cursor: default;
+}
+/* the small line: the live result while typing, the calculation after = */
+.calc-grid #answer,
+.calc-grid.solved #expr {
+  font-size: calc(var(--k) * 0.45);
+  color: color-mix(in srgb, var(--text-result) 55%, transparent);
+}
+.calc-grid.solved #answer {
+  font-size: calc(var(--k) * 0.95);
+  color: var(--text-result);
+  cursor: pointer;
+}
+/* Blinking caret where you type */
+.calc-grid .caret::after {
+  content: "";
+  flex: none;
+  width: 2px;
+  height: 0.75em;
+  margin-left: 0.06em;
+  background: currentColor;
+  border-radius: 1px;
+  animation: caret 1.1s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .calc-grid .caret::after { animation: none; }
+}
+/* the top row is all one color, DEL included */
+.calc-keys .key.blue[data-action="del"] { background: var(--key-blue); color: var(--text-c); }
 /* A calculation too long even at the smallest size: show its end, where you
    type, and let its beginning fade out */
 .field .text {
@@ -902,7 +947,7 @@ body.calc {
     <div class="equal-top">=</div>
   </div>
   <div class="calc-grid">
-    <div class="field active" id="expr"><span class="text" id="exprText"></span></div>
+    <div class="field caret" id="expr"><span class="text" id="exprText"></span></div>
     <div class="field" id="answer"></div>
   </div>
 </div>
@@ -1062,7 +1107,7 @@ function fit(f){
   const range = document.createRange();
   range.selectNodeContents(f);
   let size = parseFloat(cs.fontSize);
-  const min = f === exprField ? Math.min(size, 28) : 12;
+  const min = f === exprField ? Math.min(size, 24) : 12;
   // the caret adds about 0.1em after the number in the active field
   while(range.getBoundingClientRect().width + size * 0.1 > room && size > min){
     size -= 2;
@@ -1385,11 +1430,11 @@ function showToken(t){
 
 exprField.addEventListener('click', hideResult);
 
-// Tapping the result pill takes the result over as the start of a new
-// calculation: an operator goes on from it, a digit starts afresh.
+// Tapping the big result takes it over as the start of a new calculation:
+// an operator goes on from it, a digit starts afresh.
 answerField.addEventListener('click', ()=>{
   hideResult();
-  if(!isFinite(calcResult) || !(calcSolved || liveMode)) return;
+  if(!isFinite(calcResult) || !calcSolved) return;
   tokens = [numText(calcResult)];
   calcSolved = false;
   calcReplace = true;
@@ -1497,28 +1542,27 @@ function calcHandleKey(k){
   calcUpdate();
 }
 
-// Shows the calculation, and the result (live) or a waiting "=" in the pill below
+// Shows the calculation big (0 when empty) and the live result small below it;
+// after = the result is big and the calculation small, above it
 function calcUpdate(){
-  exprText.innerText = tokens.map(showToken).join('');
+  exprText.innerText = tokens.length ? tokens.map(showToken).join('') : '0';
   calcResult = hasOperation(tokens) ? tidy(evaluate(tokens)) : NaN;
 
-  answerField.classList.remove('computed', 'unknown');
-  if(isFinite(calcResult) && (liveMode || calcSolved)){
-    answerField.classList.add('computed');
-    answerField.innerText = calcFormat.format(calcResult);
-  } else if(isFinite(calcResult)){
-    answerField.classList.add('unknown');
-    answerField.innerText = '=';
-  } else {
-    answerField.innerText = '';
-  }
+  exprField.parentElement.classList.toggle('solved', calcSolved);
+  exprField.classList.toggle('caret', !calcSolved);
+  if(isFinite(calcResult) && calcSolved) answerField.innerText = calcFormat.format(calcResult);
+  else if(isFinite(calcResult) && liveMode) answerField.innerText = '=\u2009' + calcFormat.format(calcResult);
+  else answerField.innerText = '';
+  // the sizes swap with the class, so measure again
+  fit(exprField);
+  fit(answerField);
 
   // the operator just pressed stays lit
   const pending = tokens.length && isOp(lastToken()) ? lastToken() : null;
   calcKeys.forEach(k=> k.classList.toggle('selected', !!k.dataset.op && k.dataset.op === pending));
 }
 
-// = : calculate and show the result in place of the keypad
+// = : the result becomes the big line (the keypad stays, as on the iPhone)
 function calcCalculate(){
   while(tokens.length && isOp(lastToken())) tokens.pop();
   calcUpdate();
@@ -1526,7 +1570,6 @@ function calcCalculate(){
   calcSolved = true;
   calcReplace = true;
   calcUpdate();
-  showResult(calcFormat.format(calcResult));
 }
 
 function calcClearAll(){
@@ -1563,11 +1606,17 @@ function calcKeydown(e){
 let calcMode = false;
 try { calcMode = localStorage.getItem('proportions-tool') === 'calc'; } catch(e) {}
 const modesPanel = document.getElementById('modes');
+// the browser bar takes the color of the top of the screen
+function updateBarColor(){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(calcMode ? '--bg' : '--bg-fields').trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', v);
+}
 function setTool(calc){
   calcMode = calc;
   try { localStorage.setItem('proportions-tool', calc ? 'calc' : 'proportion'); } catch(e) {}
   document.body.classList.toggle('calc', calc);
   hideResult();
+  updateBarColor();
   document.querySelectorAll('.mode-row').forEach(r=> r.setAttribute('aria-checked', (r.dataset.mode === 'calc') === calc));
   allFields.forEach(fit);
 }
@@ -1710,7 +1759,7 @@ function applyTheme(id){
   currentTheme = THEMES[id] ? id : 'pop';
   Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
   document.body.classList.toggle('rows', !!theme.rows);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.colors['--bg-fields']);
+  updateBarColor();
   document.querySelectorAll('.themes .theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
   const picker = document.getElementById('themePicker');
   if(picker) picker.innerHTML = themeLabel(theme);
@@ -1854,6 +1903,7 @@ function tunerTarget(el){
     if(key.classList.contains('blue')) return 'c';
     return 'keys';
   }
+  if(el.closest('.calc-grid')) return 'result';
   const field = el.closest('.field');
   if(field){
     if(field.classList.contains('computed')) return 'eq';
