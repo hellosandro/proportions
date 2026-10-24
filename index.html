@@ -320,7 +320,7 @@ body {
 }
 
 /* dark labels: no lift (see markInk) */
-.key.ink-dark:not(.equal) { padding-bottom: 0; }
+.key.ink-dark:not(.equal):not(.op) { padding-bottom: 0; }
 
 .key[data-action="del"] {
   font-size: calc(var(--k) * 0.3);
@@ -432,7 +432,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 
 /* SETTINGS: button in the top-left corner of the fields area, panel as a sheet */
-.settings-btn, .palette-btn {
+.settings-btn, .palette-btn, .mode-btn {
   position: absolute;
   top: calc(16px + env(safe-area-inset-top));
   left: 16px;
@@ -448,10 +448,21 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .palette-btn { left: calc(16px + var(--k) / 2 + 8px); }   /* right next to settings */
-.settings-btn svg, .palette-btn svg { width: 55%; height: 55%; }
-.settings-btn:active, .palette-btn:active { opacity: 0.6; }
-.settings-btn:focus, .palette-btn:focus { outline: none; }
-.settings-btn:focus-visible, .palette-btn:focus-visible { outline: 1.5px solid currentColor; }
+.settings-btn svg, .palette-btn svg, .mode-btn svg { width: 55%; height: 55%; }
+.settings-btn:active, .palette-btn:active, .mode-btn:active { opacity: 0.6; }
+.settings-btn:focus, .palette-btn:focus, .mode-btn:focus { outline: none; }
+.settings-btn:focus-visible, .palette-btn:focus-visible, .mode-btn:focus-visible { outline: 1.5px solid currentColor; }
+/* MODE: button in the top-right corner (proportion or calculator), as on the
+   iPhone calculator. Phones: lined up with the right edge of the keypad */
+.mode-btn { position: fixed; z-index: 3; left: auto; right: 16px; }
+@media (max-width: 899px) {
+  .mode-btn {
+    right: auto;
+    left: calc(round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px) + 3.5 * var(--k) + 3 * var(--gap));
+  }
+}
+.mode-btn .icon-calc, body.calc .mode-btn .icon-prop { display: none; }
+body.calc .mode-btn .icon-calc { display: block; }
 
 .settings {
   position: fixed;
@@ -618,17 +629,16 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .switch-row small { display: block; font-size: 13px; opacity: 0.55; }
-/* the link to the other app: a chevron where the toggle would be */
-.app-link { text-decoration: none; }
-.app-link::after {
+/* the chosen mode gets a check where the toggle would be */
+.mode-row[aria-checked="true"]::after {
   content: "";
   flex: none;
-  width: 9px;
-  height: 9px;
-  margin-right: 4px;
+  width: 6px;
+  height: 12px;
+  margin-right: 8px;
   border-right: 1.5px solid currentColor;
   border-bottom: 1.5px solid currentColor;
-  transform: rotate(-45deg);
+  transform: translateY(-2px) rotate(45deg);
 }
 /* iOS-style toggle */
 .switch {
@@ -774,7 +784,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 /* While the bar is open, phones give it room: the fields area starts lower and
    the keys shrink to fit the remaining height */
 body.tuning { --tuner-h: 108px; }
-body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
+body.tuning .settings-btn, body.tuning .palette-btn, body.tuning .mode-btn { visibility: hidden; }
 @media (max-width: 899px) {
   /* the bar takes the badge's place: bar + 16px + two fields (2k + 24px) +
      24px + keypad (4.3k + 48px) = 6.3k + 112px + bar */
@@ -785,6 +795,82 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
   }
   body.tuning .top {
     padding-top: calc(var(--tuner-h) + 16px + env(safe-area-inset-top));
+  }
+}
+
+/* CALCULATOR MODE: the same app as a calculator. Two pills, one above the other
+     [ 12 × 3 + 4 ]   the calculation, where you type
+     [ 40         ]   the result
+   and a keypad of five rows, with the operators in the column of =  */
+.calc-grid, .calc-keys { display: none; }
+body.calc .grid, body.calc #keyboard { display: none; }
+body.calc .calc-grid, body.calc .calc-keys { display: grid; }
+
+.calc-grid {
+  /* as wide as the two proportion columns */
+  --w: min(596px, calc(100vw - 32px));
+  grid-template-columns: var(--w);
+  row-gap: 24px;
+}
+.calc-grid .field { min-width: 0; overflow: hidden; }
+/* A calculation too long even at the smallest size: show its end, where you
+   type, and let its beginning fade out */
+.field .text {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.field.overflow .text {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 calc(var(--k) * 0.3));
+  mask-image: linear-gradient(to right, transparent, #000 calc(var(--k) * 0.3));
+}
+
+.calc-keys { grid-template-rows: repeat(5, var(--k)); }
+.calc-keys .key.equal { grid-column: auto; grid-row: auto; }
+
+/* the operators look like = */
+.key.op {
+  font-size: calc(var(--k) * 0.56);
+  /* the math signs sit low in their line box: lift them to the optical center */
+  padding-bottom: 0.15em;
+  background: var(--equal-active);
+  color: var(--text-equal);
+}
+/* The operator just pressed stays lit (colors swapped) until you type the next number */
+.key.op.selected {
+  background: var(--text-equal);
+  color: var(--equal-active);
+}
+/* row themes: the top row (⌫ DEL %) has its own color, the operators take the = one */
+body.rows .key[data-row="0"] { background: var(--row0); }
+body.rows .key.op { background: var(--row-eq); }
+body.rows .key.op.selected { background: var(--row-text); color: var(--row-eq); }
+
+/* Key size with five rows: badge row (28px + k/2) + two pills (2k + 24px) +
+   24px + keypad (5 keys + 4 gaps = 5.4k, + 48px) = 7.9k + 124px */
+body.calc {
+  --k: round(down, min(100px,
+                       calc((100vw - 32px) / 4.3),
+                       calc((100svh - 124px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 7.9)), 1px);
+}
+@media (max-width: 899px) {
+  .calc-grid { --w: calc(4 * var(--k) + 3 * var(--gap)); }
+  body.calc .result { height: calc(5 * var(--k) + 4 * var(--gap) + 48px + env(safe-area-inset-bottom)); }
+  /* with the color bar open: 7.4k + 112px + bar */
+  body.calc.tuning {
+    --k: round(down, min(100px,
+                         calc((100vw - 32px) / 4.3),
+                         calc((100svh - 112px - var(--tuner-h) - env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 7.4)), 1px);
+  }
+}
+@media (min-width: 900px) {
+  .calc-grid { --w: min(596px, calc(50vw - 64px)); }
+  /* 5 keys + 4 gaps = 5.4 keys, plus 24px above and 48px below */
+  body.calc {
+    --k: round(down, min(110px,
+             calc((50vw - 96px) / 4.3),
+             calc((66.67svh - 72px) / 5.4)), 1px);
   }
 }
 </style>
@@ -815,7 +901,29 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
     <div class="bar right"></div>
     <div class="equal-top">=</div>
   </div>
+  <div class="calc-grid">
+    <div class="field active" id="expr"><span class="text" id="exprText"></span></div>
+    <div class="field" id="answer"></div>
+  </div>
 </div>
+
+<!-- MODE: proportion or calculator -->
+<button class="mode-btn" id="modeBtn" type="button" aria-label="Mode">
+  <svg class="icon-prop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/>
+    <line x1="10.5" y1="10.5" x2="13.5" y2="10.5"/><line x1="10.5" y1="13.5" x2="13.5" y2="13.5"/>
+    <circle cx="6" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="7" r="1.6" fill="currentColor" stroke="none"/>
+    <circle cx="6" cy="17" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="17" r="1.6" fill="currentColor" stroke="none"/>
+  </svg>
+  <svg class="icon-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <rect x="5" y="2.5" width="14" height="19" rx="3"/><line x1="8.5" y1="7" x2="15.5" y2="7"/>
+    <g fill="currentColor" stroke="none">
+      <circle cx="9" cy="11.5" r="1"/><circle cx="12" cy="11.5" r="1"/><circle cx="15" cy="11.5" r="1"/>
+      <circle cx="9" cy="14.5" r="1"/><circle cx="12" cy="14.5" r="1"/><circle cx="15" cy="14.5" r="1"/>
+      <circle cx="9" cy="17.5" r="1"/><circle cx="12" cy="17.5" r="1"/><circle cx="15" cy="17.5" r="1"/>
+    </g>
+  </svg>
+</button>
 
 <!-- RESULT -->
 <div class="result" id="result"></div>
@@ -842,6 +950,34 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
   <div class="key" data-decimal>,</div>
 </div>
 
+<!-- CALCULATOR KEYBOARD -->
+<div class="keyboard calc-keys" id="calcKeyboard">
+  <div class="key blue" data-action="clear" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6.5-7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div>
+  <div class="key blue" data-action="del">DEL</div>
+  <div class="key blue" data-action="percent">%</div>
+  <div class="key op" data-op="÷">÷</div>
+
+  <div class="key">7</div>
+  <div class="key">8</div>
+  <div class="key">9</div>
+  <div class="key op" data-op="×">×</div>
+
+  <div class="key">4</div>
+  <div class="key">5</div>
+  <div class="key">6</div>
+  <div class="key op" data-op="−">−</div>
+
+  <div class="key">1</div>
+  <div class="key">2</div>
+  <div class="key">3</div>
+  <div class="key op" data-op="+">+</div>
+
+  <div class="key" data-action="sign">+/-</div>
+  <div class="key">0</div>
+  <div class="key" data-decimal>,</div>
+  <div class="key equal" data-action="equal">=</div>
+</div>
+
 <!-- CONFIRM: clear all fields (DEL) -->
 <div class="settings confirm" id="confirm" aria-hidden="true">
   <div class="settings-card confirm-card" role="alertdialog" aria-labelledby="confirmTitle">
@@ -850,6 +986,22 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
       <button type="button" id="confirmCancel">Cancel</button>
       <button type="button" id="confirmOk" class="primary">Clear</button>
     </div>
+  </div>
+</div>
+
+<!-- MODE SHEET -->
+<div class="settings" id="modes" aria-hidden="true">
+  <div class="settings-card" role="dialog" aria-labelledby="modesTitle">
+    <div class="settings-head">
+      <h2 id="modesTitle">Mode</h2>
+      <button class="settings-close" id="modesClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="21" y2="21"/><line x1="21" y1="3" x2="3" y2="21"/></svg></button>
+    </div>
+    <button class="switch-row mode-row" data-mode="proportion" type="button" role="radio" aria-checked="true">
+      <span>Proportion<small>a : b = c : x</small></span>
+    </button>
+    <button class="switch-row mode-row" data-mode="calc" type="button" role="radio" aria-checked="false">
+      <span>Calculator<small>12 × 3 + 4</small></span>
+    </button>
   </div>
 </div>
 
@@ -868,9 +1020,6 @@ body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
       <span>Live result<small>Shows the result as you type</small></span>
       <span class="switch" aria-hidden="true"></span>
     </button>
-    <a class="switch-row app-link" href="calculator.html">
-      <span>Calculator<small>12 × 3 + 4</small></span>
-    </a>
     <p class="credits">
       <span class="wordmark" aria-label="POPortion"><span class="p1">P</span><span class="o1">O</span><span class="p2">P</span><span>O</span><span>R</span><span>T</span><span>I</span><span>O</span><span>N</span></span><br>
       Design by <a href="https://www.sandrostefanelli.it" target="_blank" rel="noopener">Sandro Stefanelli</a><br>
@@ -892,37 +1041,46 @@ if (window.navigator.standalone) {
 }
 
 // ELEMENTS
-const fields = document.querySelectorAll('.field');
+const fields = document.querySelectorAll('.grid .field');
 const keyboard = document.getElementById('keyboard');
+const calcKeyboard = document.getElementById('calcKeyboard');
+const exprField = document.getElementById('expr');
+const exprText = document.getElementById('exprText');
+const answerField = document.getElementById('answer');
+const allFields = [...fields, exprField, answerField];
 const resultBox = document.getElementById('result');
 
 let active = fields[0];
 
-// SHRINK FONT SIZE WHEN A NUMBER IS TOO LONG FOR ITS FIELD
+// SHRINK FONT SIZE WHEN A NUMBER IS TOO LONG FOR ITS FIELD.
+// The calculation stops shrinking at a readable size and then shows its end.
 function fit(f){
   f.style.fontSize = "";
+  f.classList.remove('overflow');
   const cs = getComputedStyle(f);
   const room = f.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   const range = document.createRange();
   range.selectNodeContents(f);
   let size = parseFloat(cs.fontSize);
+  const min = f === exprField ? Math.min(size, 28) : 12;
   // the caret adds about 0.1em after the number in the active field
-  while(range.getBoundingClientRect().width + size * 0.1 > room && size > 12){
+  while(range.getBoundingClientRect().width + size * 0.1 > room && size > min){
     size -= 2;
     f.style.fontSize = size + "px";
   }
+  if(range.getBoundingClientRect().width + size * 0.1 > room) f.classList.add('overflow');
 }
 
-fields.forEach(f=>{
+allFields.forEach(f=>{
   new MutationObserver(()=>fit(f)).observe(f, {childList:true, characterData:true, subtree:true});
 });
-window.addEventListener('resize', ()=>fields.forEach(fit));
+window.addEventListener('resize', ()=>allFields.forEach(fit));
 
 // DECIMAL SEPARATOR — follows the phone's language: "," (e.g. Italian) or "." (e.g. English).
 // Latin digits are always used, whatever the language.
 const numberFormat = new Intl.NumberFormat(navigator.language || 'en', {maximumFractionDigits:2, useGrouping:false, numberingSystem:'latn'});
 const DECIMAL = (numberFormat.formatToParts(1.5).find(p=> p.type==='decimal') || {value:'.'}).value;
-document.querySelector('.key[data-decimal]').innerText = DECIMAL;
+document.querySelectorAll('.key[data-decimal]').forEach(k=> k.innerText = DECIMAL);
 
 // READ FIELD VALUE (accepts decimal comma). A computed result is not a value you typed.
 function num(f){
@@ -957,11 +1115,13 @@ function showResult(text){
   resultBox.innerText = text;
   resultBox.classList.add('show');
   keyboard.classList.add('hide');
+  calcKeyboard.classList.add('hide');
   fitResult();
 }
 function hideResult(){
   resultBox.classList.remove('show');
   keyboard.classList.remove('hide');
+  calcKeyboard.classList.remove('hide');
 }
 function fitResult(){
   resultBox.style.fontSize = '';
@@ -1029,7 +1189,7 @@ fields.forEach(f=> f.addEventListener('click', ()=> activate(f)));
 // waits for the finger to lift and is lost if it moves a little or taps twice
 // fast). A touch on a key's round corner or in the gap goes to the nearest key.
 const keys = [...keyboard.querySelectorAll('.key')];
-function nearestKey(x, y){
+function nearestKey(keys, x, y){
   let best = null, bestD = Infinity;
   keys.forEach(k=>{
     const r = k.getBoundingClientRect();
@@ -1042,23 +1202,26 @@ function nearestKey(x, y){
 }
 keyboard.addEventListener('pointerdown', e=>{
   if(e.button > 0) return;
-  const k = nearestKey(e.clientX, e.clientY);
+  const k = nearestKey(keys, e.clientX, e.clientY);
   if(!k) return;
   e.preventDefault();
   k.classList.add('pressed');
-  if(k.dataset.action === 'clear'){ pressClear(k); return; }
+  if(k.dataset.action === 'clear'){
+    pressClear(k, ()=>{ editActive(t=> t.slice(0, -1)); updateLive(); },
+                  ()=>{ editActive(()=> ''); updateLive(); });
+    return;
+  }
   setTimeout(()=> k.classList.remove('pressed'), 120);
   handleKey(k);
 });
 
 // C: a tap deletes the last digit, a long press (half a second) clears the field
 let clearTimer = null;
-function pressClear(k){
+function pressClear(k, tap, hold){
   clearTimer = setTimeout(()=>{
     clearTimer = null;
     k.classList.remove('pressed');
-    editActive(()=> '');
-    updateLive();
+    hold();
   }, 500);
   const release = ()=>{
     window.removeEventListener('pointerup', release);
@@ -1067,8 +1230,7 @@ function pressClear(k){
     if(clearTimer){
       clearTimeout(clearTimer);
       clearTimer = null;
-      editActive(t=> t.slice(0, -1));
-      updateLive();
+      tap();
     }
   };
   window.addEventListener('pointerup', release);
@@ -1079,7 +1241,8 @@ function pressClear(k){
 const confirmPanel = document.getElementById('confirm');
 let confirmOpenedAt = 0;   // the click that follows the DEL touch must not close it
 function askClearAll(){
-  if(![...fields].some(f=> f.innerText !== '')) return;   // nothing to clear
+  if(calcMode ? !tokens.length : ![...fields].some(f=> f.innerText !== '')) return;   // nothing to clear
+  document.getElementById('confirmTitle').textContent = calcMode ? 'Clear the calculation?' : 'Clear all fields?';
   confirmPanel.classList.add('open');
   confirmPanel.setAttribute('aria-hidden','false');
   confirmOpenedAt = Date.now();
@@ -1088,7 +1251,7 @@ function closeConfirm(){
   confirmPanel.classList.remove('open');
   confirmPanel.setAttribute('aria-hidden','true');
 }
-document.getElementById('confirmOk').addEventListener('click', ()=>{ closeConfirm(); clearAll(); });
+document.getElementById('confirmOk').addEventListener('click', ()=>{ closeConfirm(); clearEverything(); });
 document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
 confirmPanel.addEventListener('click', e=>{
   if(e.target===confirmPanel && Date.now() - confirmOpenedAt > 500) closeConfirm();
@@ -1161,6 +1324,7 @@ function setMode(live){
   try { localStorage.setItem('proportions-mode', live ? 'live' : 'equal'); } catch(e) {}
   document.getElementById('liveSwitch').setAttribute('aria-checked', live);
   updateLive();
+  calcUpdate();
 }
 
 // CLEAR ALL FIELDS
@@ -1176,19 +1340,272 @@ function clearAll(){
   updateLive();
 }
 
+// CALCULATOR MODE — the same app as a calculator. The calculation is a list of
+// numbers and operators, e.g. ['12', '×', '3', '+', '4']. Numbers are kept as
+// typed, with "." and "-" (shown with the phone's decimal separator and a true
+// minus sign). × and ÷ come before + and −, as on paper.
+const calcFormat = new Intl.NumberFormat(navigator.language || 'en', {maximumFractionDigits:10, useGrouping:false, numberingSystem:'latn'});
+const OPS = ['+', '−', '×', '÷'];
+const isOp = t => OPS.includes(t);
+let tokens = [];
+let calcSolved = false;      // = was pressed (until the next edit)
+let calcResult = NaN;        // latest result
+let calcReplace = false;     // first digit starts a new calculation (after = or taking over the result)
+
+// 0.1 + 0.2 gives 0.30000000000000004: twelve significant digits hide that
+const tidy = n => Number(n.toPrecision(12));
+const numText = n => String(tidy(n));
+
+function evaluate(t){
+  t = t.slice();
+  while(t.length && isOp(t[t.length-1])) t.pop();
+  if(!t.length) return NaN;
+  // first × and ÷, then + and −
+  const terms = [parseFloat(t[0])], signs = [];
+  for(let i=1; i<t.length; i+=2){
+    const op = t[i], n = parseFloat(t[i+1]);
+    if(op==='×') terms[terms.length-1] *= n;
+    else if(op==='÷') terms[terms.length-1] /= n;
+    else { signs.push(op); terms.push(n); }
+  }
+  return signs.reduce((r, op, j)=> op==='+' ? r + terms[j+1] : r - terms[j+1], terms[0]);
+}
+
+// a calculation has a result once it has at least one operation: 12 × 3
+function hasOperation(t){
+  t = t.slice();
+  while(t.length && isOp(t[t.length-1])) t.pop();
+  return t.length >= 3;
+}
+
+function showToken(t){
+  if(isOp(t)) return ' ' + t + ' ';   // thin spaces around the operators
+  return t.replace('-', '−').replace('.', DECIMAL);
+}
+
+exprField.addEventListener('click', hideResult);
+
+// Tapping the result pill takes the result over as the start of a new
+// calculation: an operator goes on from it, a digit starts afresh.
+answerField.addEventListener('click', ()=>{
+  hideResult();
+  if(!isFinite(calcResult) || !(calcSolved || liveMode)) return;
+  tokens = [numText(calcResult)];
+  calcSolved = false;
+  calcReplace = true;
+  calcUpdate();
+});
+
+// Typing helpers: a digit after = starts a new calculation, an operator
+// (or %, +/-) goes on from the result
+function calcFresh(){
+  if(calcReplace) tokens = [];
+  calcSolved = false;
+  calcReplace = false;
+  hideResult();
+}
+function calcGoOn(){
+  if(calcSolved) tokens = [numText(calcResult)];
+  calcSolved = false;
+  calcReplace = false;
+  hideResult();
+}
+const lastToken = () => tokens[tokens.length-1];
+const lastIsNumber = () => tokens.length > 0 && !isOp(lastToken());
+
+function typeDigit(d){
+  calcFresh();
+  if(!lastIsNumber()) tokens.push(d);
+  else if(lastToken()==='0') tokens[tokens.length-1] = d;
+  else if(lastToken()==='-0') tokens[tokens.length-1] = '-' + d;
+  else tokens[tokens.length-1] += d;
+}
+function typeDecimal(){
+  calcFresh();
+  if(!lastIsNumber()) tokens.push('0.');
+  else if(lastToken()==='-') tokens[tokens.length-1] = '-0.';
+  else if(!lastToken().includes('.')) tokens[tokens.length-1] += '.';
+}
+function typeOp(op){
+  calcGoOn();
+  // a number still waiting for its digits ("-") gives way to the operator
+  if(lastIsNumber() && isNaN(parseFloat(lastToken()))) tokens.pop();
+  if(!tokens.length) tokens.push('0');
+  if(isOp(lastToken())) tokens[tokens.length-1] = op;
+  else tokens.push(op);
+}
+function calcToggleSign(){
+  calcGoOn();
+  if(!lastIsNumber()) tokens.push('-');
+  else tokens[tokens.length-1] = lastToken().startsWith('-') ? lastToken().slice(1) : '-' + lastToken();
+}
+// % : 50 + 10% = 55 (a share of what comes before), 30 × 10% = 3
+function percent(){
+  calcGoOn();
+  if(!lastIsNumber()) return;
+  const n = parseFloat(lastToken());
+  if(isNaN(n)) return;
+  const i = tokens.length - 1;
+  const ofBase = i >= 2 && (tokens[i-1]==='+' || tokens[i-1]==='−');
+  const v = ofBase ? evaluate(tokens.slice(0, i-1)) * n / 100 : n / 100;
+  if(isFinite(v)) tokens[i] = numText(v);
+}
+// ⌫ : delete the last digit (or operator)
+function backspace(){
+  calcSolved = false;
+  calcReplace = false;
+  hideResult();
+  if(!tokens.length) return;
+  const t = lastToken();
+  if(isOp(t) || t.length <= 1) tokens.pop();
+  else tokens[tokens.length-1] = t.slice(0, -1);
+}
+// long press on ⌫ : delete the whole number you are typing (or the operator)
+function clearEntry(){
+  calcSolved = false;
+  calcReplace = false;
+  hideResult();
+  tokens.pop();
+}
+
+const calcKeys = [...calcKeyboard.querySelectorAll('.key')];
+calcKeyboard.addEventListener('pointerdown', e=>{
+  if(e.button > 0) return;
+  const k = nearestKey(calcKeys, e.clientX, e.clientY);
+  if(!k) return;
+  e.preventDefault();
+  k.classList.add('pressed');
+  if(k.dataset.action === 'clear'){
+    pressClear(k, ()=>{ backspace(); calcUpdate(); }, ()=>{ clearEntry(); calcUpdate(); });
+    return;
+  }
+  setTimeout(()=> k.classList.remove('pressed'), 120);
+  calcHandleKey(k);
+});
+
+function calcHandleKey(k){
+  const act = k.dataset.action;
+
+  if(k.dataset.op) typeOp(k.dataset.op);
+  else if(k.hasAttribute('data-decimal')) typeDecimal();
+  else if(!act) typeDigit(k.innerText);
+  if(act==="del"){ askClearAll(); return; }
+  if(act==="sign") calcToggleSign();
+  if(act==="percent") percent();
+  if(act==="equal"){ calcCalculate(); return; }
+
+  calcUpdate();
+}
+
+// Shows the calculation, and the result (live) or a waiting "=" in the pill below
+function calcUpdate(){
+  exprText.innerText = tokens.map(showToken).join('');
+  calcResult = hasOperation(tokens) ? tidy(evaluate(tokens)) : NaN;
+
+  answerField.classList.remove('computed', 'unknown');
+  if(isFinite(calcResult) && (liveMode || calcSolved)){
+    answerField.classList.add('computed');
+    answerField.innerText = calcFormat.format(calcResult);
+  } else if(isFinite(calcResult)){
+    answerField.classList.add('unknown');
+    answerField.innerText = '=';
+  } else {
+    answerField.innerText = '';
+  }
+
+  // the operator just pressed stays lit
+  const pending = tokens.length && isOp(lastToken()) ? lastToken() : null;
+  calcKeys.forEach(k=> k.classList.toggle('selected', !!k.dataset.op && k.dataset.op === pending));
+}
+
+// = : calculate and show the result in place of the keypad
+function calcCalculate(){
+  while(tokens.length && isOp(lastToken())) tokens.pop();
+  calcUpdate();
+  if(!isFinite(calcResult)) return;
+  calcSolved = true;
+  calcReplace = true;
+  calcUpdate();
+  showResult(calcFormat.format(calcResult));
+}
+
+function calcClearAll(){
+  tokens = [];
+  calcSolved = false;
+  calcReplace = false;
+  hideResult();
+  calcUpdate();
+}
+
+// DEL (after asking) and Escape clear the mode in use
+function clearEverything(){
+  if(calcMode) calcClearAll(); else clearAll();
+}
+
+// Computer keyboard in calculator mode
+function calcKeydown(e){
+  const ops = {'+':'+', '-':'−', '*':'×', 'x':'×', 'X':'×', '/':'÷', ':':'÷'};
+  if(/^[0-9]$/.test(e.key)) typeDigit(e.key);          // digits
+  else if(e.key==="." || e.key===",") typeDecimal();   // decimal separator
+  else if(ops[e.key]) typeOp(ops[e.key]);              // + − × ÷
+  else if(e.key==="%") percent();
+  else if(e.key==="Backspace") backspace();            // delete last character
+  else if(e.key==="Delete") clearEntry();              // delete the current number
+  else if(e.key==="Escape") calcClearAll();            // clear everything (like DEL)
+  else if(e.key==="Enter" || e.key==="="){ calcCalculate(); e.preventDefault(); return; }
+  else return;
+  calcUpdate();
+  e.preventDefault();
+}
+
+// MODE — proportion or calculator, chosen with the button at the top right
+// and remembered on this device
+let calcMode = false;
+try { calcMode = localStorage.getItem('proportions-tool') === 'calc'; } catch(e) {}
+const modesPanel = document.getElementById('modes');
+function setTool(calc){
+  calcMode = calc;
+  try { localStorage.setItem('proportions-tool', calc ? 'calc' : 'proportion'); } catch(e) {}
+  document.body.classList.toggle('calc', calc);
+  hideResult();
+  document.querySelectorAll('.mode-row').forEach(r=> r.setAttribute('aria-checked', (r.dataset.mode === 'calc') === calc));
+  allFields.forEach(fit);
+}
+function openModes(){
+  modesPanel.classList.add('open');
+  modesPanel.setAttribute('aria-hidden','false');
+}
+function closeModes(){
+  modesPanel.classList.remove('open');
+  modesPanel.setAttribute('aria-hidden','true');
+}
+document.getElementById('modeBtn').addEventListener('click', openModes);
+document.getElementById('modesClose').addEventListener('click', closeModes);
+modesPanel.addEventListener('click', e=>{ if(e.target===modesPanel) closeModes(); });
+document.querySelectorAll('.mode-row').forEach(r=> r.addEventListener('click', ()=>{
+  setTool(r.dataset.mode === 'calc');
+  closeModes();
+}));
+setTool(calcMode);
+
 // DESKTOP KEYBOARD INPUT
 document.addEventListener('keydown', e=>{
   if(e.ctrlKey || e.metaKey || e.altKey) return;
   if(e.target.closest && e.target.closest('.tuner')) return;
   if(confirmPanel.classList.contains('open')){
     if(e.key==="Escape") closeConfirm();
-    if(e.key==="Enter"){ closeConfirm(); clearAll(); }
+    if(e.key==="Enter"){ closeConfirm(); clearEverything(); }
     e.preventDefault(); return;
   }
   if(document.getElementById('settings').classList.contains('open')){
     if(e.key==="Escape") closeSettings();
     return;
   }
+  if(modesPanel.classList.contains('open')){
+    if(e.key==="Escape") closeModes();
+    return;
+  }
+  if(calcMode){ calcKeydown(e); return; }
 
   // Digits
   if(/^[0-9]$/.test(e.key)){
@@ -1252,7 +1669,9 @@ document.addEventListener('keydown', e=>{
 });
 
 // KEYPAD ROWS: 7 8 9 C / 4 5 6 DEL / 1 2 3 = / +/- 0 ,  (the = key spans rows 3-4)
-document.querySelectorAll('.key').forEach((k,i)=>{ k.dataset.row = Math.floor(i/4) + 1; });
+keys.forEach((k,i)=>{ k.dataset.row = Math.floor(i/4) + 1; });
+// calculator: ⌫ DEL % ÷ (row 0) / 7 8 9 × / 4 5 6 − / 1 2 3 + / +/- 0 , =
+calcKeys.forEach((k,i)=>{ k.dataset.row = Math.floor(i/4); });
 
 // COLOR THEMES — chosen in the settings panel and remembered on this device
 const THEMES = {
@@ -1280,9 +1699,9 @@ const THEMES = {
   neon: { name: 'Neon', colors: {
     '--bg-fields':'#000000','--equal':'#12B08C','--icon-bg':'#262626','--icon':'#12B08C','--field-active':'#DCDCDC','--field-active-border':'#DCDCDC','--text-active':'#000000','--field-idle':'#262626','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#CF2BB6','--text-keys':'#FFFFFF','--key-blue':'#12B08C','--text-c':'#FFFFFF','--key-del':'#12B08C','--text-del':'#FFFFFF','--equal-off':'#0B5E4B','--equal-active':'#12B08C','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   arcobaleno: { name: 'Rainbow', rows: true, colors: {
-    '--bg-fields':'#242324','--equal':'#FFFFFF','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#242324','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#F77C18','--text-equal':'#FFFFFF','--row1':'#2B90EE','--row2':'#35D0AE','--row3':'#F9C415','--row4':'#FB3F3C','--row-eq':'#F77C18','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+    '--bg-fields':'#242324','--equal':'#FFFFFF','--icon-bg':'#A673EA','--icon':'#FFFFFF','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#9355E6','--field-idle':'#A673EA','--text-idle':'#FFFFFF','--bg':'#242324','--text-result':'#FFFFFF','--key':'#3177DB','--text-keys':'#FFFFFF','--key-blue':'#3177DB','--text-c':'#FFFFFF','--key-del':'#30B498','--text-del':'#FFFFFF','--equal-off':'#E84D24','--equal-active':'#F77C18','--text-equal':'#FFFFFF','--row0':'#A673EA','--row1':'#2B90EE','--row2':'#35D0AE','--row3':'#F9C415','--row4':'#FB3F3C','--row-eq':'#F77C18','--row-text':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   lilla: { name: 'Lilac', rows: true, colors: {
-    '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9E784','--field-active-border':'#C9E784','--text-active':'#192405','--field-idle':'#DDD0EE','--text-idle':'#8756C2','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#FFFFFF','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
+    '--bg-fields':'#EBE3F5','--equal':'#9B70C6','--icon-bg':'#DDD0EE','--icon':'#4A3A5A','--field-active':'#C9E784','--field-active-border':'#C9E784','--text-active':'#192405','--field-idle':'#DDD0EE','--text-idle':'#8756C2','--bg':'#EBE3F5','--text-result':'#3A2A4E','--key':'#CDB2E6','--text-keys':'#3A2A4E','--key-blue':'#CDB2E6','--text-c':'#3A2A4E','--key-del':'#B591D8','--text-del':'#3A2A4E','--equal-off':'#6E43A3','--equal-active':'#6E43A3','--text-equal':'#3A2A4E','--row0':'#DCC6EE','--row1':'#CDB2E6','--row2':'#B591D8','--row3':'#9B70C6','--row4':'#8357B4','--row-eq':'#6E43A3','--row-text':'#FFFFFF','--text-fields':'#4A3A5A','--ink':'#3A2A4E' }}
 };
 
 let currentTheme = 'pop';
@@ -1302,7 +1721,7 @@ function applyTheme(id){
 // Dark labels look higher than light ones on a round key (light ones glow and
 // spread), so keys with dark text drop the small lift. The = keeps its own.
 function markInk(){
-  keys.forEach(k=>{
+  [...keys, ...calcKeys].forEach(k=>{
     const [r,g,b] = getComputedStyle(k).color.match(/\d+(\.\d+)?/g).map(Number);
     const lum = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
     k.classList.toggle('ink-dark', lum < 0.5);
@@ -1406,6 +1825,7 @@ function tunerGroups(){
   ];
   if(rows){
     g.push(
+      {id:'row0', label:'Row ⌫ DEL % (calculator)', parts:[['Fill','--row0'],['Text','--row-text']]},
       {id:'row1', label:'Row 7 8 9 C',   parts:[['Fill','--row1'],['Text','--row-text']]},
       {id:'row2', label:'Row 4 5 6 DEL', parts:[['Fill','--row2'],['Text','--row-text']]},
       {id:'row3', label:'Row 1 2 3',     parts:[['Fill','--row3'],['Text','--row-text']]},
@@ -1415,7 +1835,7 @@ function tunerGroups(){
   } else {
     g.push(
       {id:'keys', label:'Number keys', parts:[['Fill','--key'],['Digits','--text-keys']]},
-      {id:'c',    label:'C key',      parts:[['Fill','--key-blue'],['Text','--text-c']]},
+      {id:'c',    label:'C and % keys', parts:[['Fill','--key-blue'],['Text','--text-c']]},
       {id:'del',  label:'DEL key',    parts:[['Fill','--key-del'],['Text','--text-del']]},
       {id:'eq',   label:'= key', parts:[['Fill','--equal-active'],['Text','--text-equal']]}
     );
@@ -1428,10 +1848,10 @@ function tunerTarget(el){
   const rows = document.body.classList.contains('rows');
   const key = el.closest('.key');
   if(key){
-    if(key.classList.contains('equal')) return 'eq';
+    if(key.classList.contains('equal') || key.classList.contains('op')) return 'eq';
     if(rows) return 'row' + key.dataset.row;
-    if(key.dataset.action === 'clear') return 'c';
     if(key.dataset.action === 'del') return 'del';
+    if(key.classList.contains('blue')) return 'c';
     return 'keys';
   }
   const field = el.closest('.field');
@@ -1440,7 +1860,7 @@ function tunerTarget(el){
     return field.classList.contains('active') ? 'active' : 'idle';
   }
   if(el.closest('.bar, .equal-top')) return 'bars';
-  if(el.closest('.settings-btn, .palette-btn')) return 'badge';
+  if(el.closest('.settings-btn, .palette-btn, .mode-btn')) return 'badge';
   if(el.closest('#result')) return 'result';
   if(el.closest('.top')) return 'fields-bg';
   return 'kbd-bg';
@@ -1559,7 +1979,7 @@ function openTuner(){
     window.refreshTuner = null;
     document.body.classList.remove('tuning');
     history.replaceState(null, '', location.pathname);
-    fields.forEach(fit);
+    allFields.forEach(fit);
   });
 
   // Keep the bar in sync when a theme is picked in the settings
@@ -1569,7 +1989,7 @@ function openTuner(){
 
   document.body.appendChild(panel);
   document.body.classList.add('tuning');
-  fields.forEach(fit);
+  allFields.forEach(fit);
 }
 
 document.getElementById('liveSwitch').addEventListener('click', ()=> setMode(!liveMode));

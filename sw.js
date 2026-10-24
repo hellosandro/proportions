@@ -1,13 +1,11 @@
 // POPortion service worker: keeps a copy of the app so it opens offline.
 // Online, it always asks the network first, so updates show up right away;
 // offline, it answers from the copy.
-const CACHE = 'poportion-v2';
+const CACHE = 'poportion-v3';
 const FILES = [
   './',
   'index.html',
   'manifest.json',
-  'calculator.html',
-  'calculator.webmanifest',
   'fonts/inter-latin.woff2',
   'fonts/poppins-800-wordmark.woff2',
   'apple-touch-icon.png',
