@@ -860,8 +860,8 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
 @media (prefers-reduced-motion: reduce) {
   .calc-grid .caret::after { animation: none; }
 }
-/* the top row is all one color, DEL included */
-.calc-keys .key.blue[data-action="del"] { background: var(--key-blue); color: var(--text-c); }
+/* the top row is all one color, DEL included (row themes: see below) */
+body:not(.rows) .calc-keys .key.blue[data-action="del"] { background: var(--key-blue); color: var(--text-c); }
 /* A calculation too long even at the smallest size: show its end, where you
    type, and let its beginning fade out */
 .field .text {
@@ -891,10 +891,15 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   background: var(--text-equal);
   color: var(--equal-active);
 }
-/* row themes: the top row (⌫ DEL %) has its own color, the operators take the = one */
+/* row themes keep their logic, as in the proportion: each row in its own
+   color, operator included (the top row ⌫ DEL % ÷ has one more color, row 0),
+   and only = in its own. The operator just pressed: row colors swapped */
 body.rows .key[data-row="0"] { background: var(--row0); }
-body.rows .key.op { background: var(--row-eq); }
-body.rows .key.op.selected { background: var(--row-text); color: var(--row-eq); }
+body.rows .key.op.selected { background: var(--row-text); }
+body.rows .key.op.selected[data-row="0"] { color: var(--row0); }
+body.rows .key.op.selected[data-row="1"] { color: var(--row1); }
+body.rows .key.op.selected[data-row="2"] { color: var(--row2); }
+body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
 
 /* Same keys in both modes: the key size does not change, and the keypad sits
    on the bottom edge, so the digit rows stay exactly where they are and the
@@ -1865,7 +1870,7 @@ function tunerGroups(){
   ];
   if(rows){
     g.push(
-      {id:'row0', label:'Row ⌫ DEL % (calculator)', parts:[['Fill','--row0'],['Text','--row-text']]},
+      {id:'row0', label:'Row ⌫ DEL % ÷ (calculator)', parts:[['Fill','--row0'],['Text','--row-text']]},
       {id:'row1', label:'Row 7 8 9 C',   parts:[['Fill','--row1'],['Text','--row-text']]},
       {id:'row2', label:'Row 4 5 6 DEL', parts:[['Fill','--row2'],['Text','--row-text']]},
       {id:'row3', label:'Row 1 2 3',     parts:[['Fill','--row3'],['Text','--row-text']]},
@@ -1888,7 +1893,7 @@ function tunerTarget(el){
   const rows = document.body.classList.contains('rows');
   const key = el.closest('.key');
   if(key){
-    if(key.classList.contains('equal') || key.classList.contains('op')) return 'eq';
+    if(key.classList.contains('equal') || (key.classList.contains('op') && !rows)) return 'eq';
     if(rows) return 'row' + key.dataset.row;
     if(key.dataset.action === 'del') return 'del';
     if(key.classList.contains('blue')) return 'c';
