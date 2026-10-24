@@ -621,12 +621,14 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 .switch-row small { display: block; font-size: 13px; opacity: 0.55; }
 /* MODE: proportion or calculator, two square-ish tiles side by side at the
-   top of the settings, a drawn icon over the name; the chosen one is dark */
+   top of the settings, a drawn icon over the name, in the Pop colors of the
+   wordmark (blue and magenta): the chosen one in full color, the other in a
+   light tint of its own */
 .mode-switch {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(2, 132px);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 .mode-switch button {
   display: flex;
@@ -634,19 +636,21 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   align-items: center;
   justify-content: center;
   gap: 10px;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 0.9;
   padding: 12px;
   border: none;
   border-radius: 18px;
-  background: #F4F4F4;
-  color: #111;
+  background: color-mix(in srgb, var(--pop) 12%, #FFFFFF);
+  color: var(--pop);
   font: inherit;
   font-size: 17px;
   font-weight: 300;
   cursor: pointer;
 }
 .mode-switch svg { width: 40px; height: 40px; display: block; }
-.mode-switch button[aria-checked="true"] { background: #111; color: #FFF; }
+.mode-switch [data-mode="proportion"] { --pop: #4D4DFF; }   /* Pop blue */
+.mode-switch [data-mode="calc"] { --pop: #FF2BD6; }         /* Pop magenta */
+.mode-switch button[aria-checked="true"] { background: var(--pop); color: #FFF; }
 .mode-switch button:active { opacity: 0.7; }
 /* iOS-style toggle */
 .switch {
