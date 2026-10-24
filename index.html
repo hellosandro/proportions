@@ -894,6 +894,14 @@ body:not(.rows) .calc-keys .key.blue[data-action="del"] { background: var(--key-
   background: var(--text-equal);
   color: var(--equal-active);
 }
+/* Palettes with a light and a dark accent (calcSwap in THEMES): the light one
+   goes on the top row, the dark one on the right column */
+body.calc-swap:not(.rows) .calc-keys .key.blue,
+body.calc-swap:not(.rows) .calc-keys .key.blue[data-action="del"] { background: var(--equal-active); color: var(--text-equal); }
+body.calc-swap:not(.rows) .calc-keys .key.op,
+body.calc-swap:not(.rows) .calc-keys .key.equal { background: var(--key-blue); color: var(--text-c); }
+body.calc-swap:not(.rows) .calc-keys .key.op.selected { background: var(--text-c); color: var(--key-blue); }
+
 /* row themes keep their logic, as in the proportion: each row in its own
    color, operator included (the top row ⌫ DEL % ÷ has one more color, row 0),
    and only = in its own. The operator just pressed: row colors swapped */
@@ -1730,7 +1738,7 @@ const THEMES = {
     '--equal':'#F2FBE3','--icon':'#F2FBE3','--equal-off':'#22CC6E','--equal-active':'#22CC6E','--key':'#FF2BD6',
     '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
-  grafite: { name: 'Graphite', colors: {
+  grafite: { name: 'Graphite', calcSwap: true, colors: {
     '--bg-fields':'#EDEDED','--equal':'#7B838E','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   notte: { name: 'Night', colors: {
     '--bg-fields':'#141414','--equal':'#8E8E93','--icon-bg':'#2C2C2E','--icon':'#FFFFFF','--field-active':'#A5A5A5','--field-active-border':'#A5A5A5','--text-active':'#000000','--field-idle':'#242424','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#333333','--text-keys':'#FFFFFF','--key-blue':'#A5A5A5','--text-c':'#000000','--key-del':'#A5A5A5','--text-del':'#000000','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
@@ -1740,9 +1748,9 @@ const THEMES = {
     '--bg-fields':'#D6F5FA','--equal':'#111111','--icon-bg':'#BDEBF2','--icon':'#111111','--field-active':'#FFFFFF','--field-active-border':'#FFFFFF','--text-active':'#111111','--field-idle':'#BDEBF2','--text-idle':'#111111','--bg':'#FFFF3D','--text-result':'#111111','--key':'#FFFF3D','--text-keys':'#111111','--key-blue':'#FFFFC7','--text-c':'#111111','--key-del':'#FFFFC7','--text-del':'#111111','--equal-off':'#FFFFC7','--equal-active':'#111111','--text-equal':'#FFFF3D','--text-fields':'#111111','--ink':'#111111' }},
   serd: { name: 'Serd', colors: {
     '--bg-fields':'#3A1A1C','--equal':'#E8433A','--icon-bg':'#4C2427','--icon':'#E8433A','--field-active':'#E8433A','--field-active-border':'#E8433A','--text-active':'#3A1A1C','--field-idle':'#4C2427','--text-idle':'#E8433A','--bg':'#B5AE9B','--text-result':'#222222','--key':'#F4F0DF','--text-keys':'#222222','--key-blue':'#5B84C4','--text-c':'#FFFFFF','--key-del':'#5B84C4','--text-del':'#FFFFFF','--equal-off':'#D9928C','--equal-active':'#E8433A','--text-equal':'#FFFFFF','--text-fields':'#E8433A','--ink':'#222222' }},
-  arancia: { name: 'Orange', colors: {
+  arancia: { name: 'Orange', calcSwap: true, colors: {
     '--bg-fields':'#F26B1D','--equal':'#2E3338','--icon-bg':'#F3C080','--icon':'#2E3338','--field-active':'#2E3338','--field-active-border':'#2E3338','--text-active':'#F3C080','--field-idle':'#F3C080','--text-idle':'#2E3338','--bg':'#2E3338','--text-result':'#F3C080','--key':'#15181B','--text-keys':'#F4F0E6','--key-blue':'#F26B1D','--text-c':'#15181B','--key-del':'#B5A88A','--text-del':'#15181B','--equal-off':'#7A705C','--equal-active':'#F3C080','--text-equal':'#15181B','--text-fields':'#2E3338','--ink':'#F3C080' }},
-  rockwell: { name: 'Rockwell', colors: {
+  rockwell: { name: 'Rockwell', calcSwap: true, colors: {
     '--bg-fields':'#2F3A40','--equal':'#B8BDB9','--icon-bg':'#3C4950','--icon':'#B8BDB9','--field-active':'#F3F3EF','--field-active-border':'#F3F3EF','--text-active':'#2F3A40','--field-idle':'#3C4950','--text-idle':'#B8BDB9','--bg':'#B8BDB9','--text-result':'#2F3A40','--key':'#F4F4F0','--text-keys':'#2F3A40','--key-blue':'#3E9A3E','--text-c':'#FFFFFF','--key-del':'#3E9A3E','--text-del':'#FFFFFF','--equal-off':'#A9D08A','--equal-active':'#7DC242','--text-equal':'#2F3A40','--text-fields':'#B8BDB9','--ink':'#2F3A40' }},
   rosa: { name: 'Pink', colors: {
     '--bg-fields':'#000000','--equal':'#F7A1C4','--icon-bg':'#2A0F1A','--icon':'#F7A1C4','--field-active':'#E8317E','--field-active-border':'#E8317E','--text-active':'#FFFFFF','--field-idle':'#2A0F1A','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#E8317E','--text-keys':'#FFFFFF','--key-blue':'#F7A1C4','--text-c':'#8A1248','--key-del':'#F7A1C4','--text-del':'#8A1248','--equal-off':'#5A1530','--equal-active':'#F7A1C4','--text-equal':'#8A1248','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
@@ -1760,6 +1768,7 @@ function applyTheme(id){
   currentTheme = THEMES[id] ? id : 'pop';
   Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
   document.body.classList.toggle('rows', !!theme.rows);
+  document.body.classList.toggle('calc-swap', !!theme.calcSwap);
   updateBarColor();
   document.querySelectorAll('.themes .theme').forEach(b=> b.classList.toggle('selected', b.dataset.theme===id));
   const picker = document.getElementById('themePicker');
