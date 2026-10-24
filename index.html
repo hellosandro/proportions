@@ -804,10 +804,11 @@ body.tuning .settings-btn, body.tuning .palette-btn, body.tuning .mode-btn { vis
    iPhone calculator on the keys: the top row (⌫ DEL %) in one color, the
    digits in another, the operators in the color of =. The two backgrounds
    of the proportion stay. No pills: the calculation is written straight on
-   the fields background, right-aligned
-                                 12 × 3 + 4    big, where you type
+   the fields background, right-aligned, as on the iPhone
                                        = 40    small: the live result
-   and after = the two lines swap sizes: the calculation small, the result big */
+                                 12 × 3 + 4    big, where you type
+   and after = the calculation goes small on top and the result takes the big
+   line. The big line never moves, just above the keypad. */
 .calc-grid, .calc-keys { display: none; }
 body.calc .grid, body.calc #keyboard { display: none; }
 body.calc .calc-grid, body.calc .calc-keys { display: grid; }
@@ -834,6 +835,8 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   cursor: default;
 }
 /* the small line: the live result while typing, the calculation after = */
+.calc-grid #answer { order: -1; }   /* the small line is on top */
+.calc-grid.solved #expr { order: -2; }
 .calc-grid #answer,
 .calc-grid.solved #expr {
   font-size: calc(var(--k) * 0.33);
@@ -908,6 +911,8 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
    calculation, 0.9k + 24px, holds the big line (0.77k) and the small one. */
 @media (max-width: 899px) {
   .calc-grid { --w: calc(4 * var(--k) + 3 * var(--gap)); }
+  /* the big line sits close to the keypad (the 28px run under its rounded top) */
+  body.calc .top { padding-bottom: 28px; }
 }
 @media (min-width: 900px) {
   .calc-grid { --w: min(596px, calc(50vw - 64px)); }
