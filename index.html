@@ -801,9 +801,10 @@ body.tuning .settings-btn, body.tuning .palette-btn, body.tuning .mode-btn { vis
 }
 
 /* CALCULATOR MODE: the same app as a calculator, with the color logic of the
-   iPhone calculator: one background, the top row (⌫ DEL %) in one color, the
-   digits in another, the operators in the color of =. No pills: the
-   calculation is written straight on the background, right-aligned
+   iPhone calculator on the keys: the top row (⌫ DEL %) in one color, the
+   digits in another, the operators in the color of =. The two backgrounds
+   of the proportion stay. No pills: the calculation is written straight on
+   the fields background, right-aligned
                                  12 × 3 + 4    big, where you type
                                        = 40    small: the live result
    and after = the two lines swap sizes: the calculation small, the result big */
@@ -817,9 +818,6 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   grid-template-columns: var(--w);
   row-gap: 0;
 }
-body.calc, body.calc .top { background: var(--bg); }
-/* the round buttons at the top take the colors of the top row of keys */
-body.calc { --icon-bg: var(--key-blue); --icon: var(--text-c); }
 .calc-grid .field {
   min-width: 0;
   height: auto;
@@ -828,7 +826,8 @@ body.calc { --icon-bg: var(--key-blue); --icon: var(--text-c); }
   justify-content: flex-end;
   background: none;
   border-radius: 0;
-  color: var(--text-result);
+  /* written on the fields background, in the color of the proportion's bars and = */
+  color: var(--equal);
   /* as on the iPhone: digits 0.56 of a key tall on the big line, 0.24 on the small one */
   font-size: calc(var(--k) * 0.77);
   line-height: 1;
@@ -839,12 +838,12 @@ body.calc { --icon-bg: var(--key-blue); --icon: var(--text-c); }
 .calc-grid.solved #expr {
   font-size: calc(var(--k) * 0.33);
   line-height: 1.2;
-  color: color-mix(in srgb, var(--text-result) 55%, transparent);
+  color: color-mix(in srgb, var(--equal) 55%, transparent);
 }
 .calc-grid.solved #answer {
   font-size: calc(var(--k) * 0.77);
   line-height: 1;
-  color: var(--text-result);
+  color: var(--equal);
   cursor: pointer;
 }
 /* Blinking caret where you type */
@@ -1601,7 +1600,7 @@ try { calcMode = localStorage.getItem('proportions-tool') === 'calc'; } catch(e)
 const modesPanel = document.getElementById('modes');
 // the browser bar takes the color of the top of the screen
 function updateBarColor(){
-  const v = getComputedStyle(document.documentElement).getPropertyValue(calcMode ? '--bg' : '--bg-fields').trim();
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--bg-fields').trim();
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', v);
 }
 function setTool(calc){
@@ -1609,7 +1608,6 @@ function setTool(calc){
   try { localStorage.setItem('proportions-tool', calc ? 'calc' : 'proportion'); } catch(e) {}
   document.body.classList.toggle('calc', calc);
   hideResult();
-  updateBarColor();
   document.querySelectorAll('.mode-row').forEach(r=> r.setAttribute('aria-checked', (r.dataset.mode === 'calc') === calc));
   allFields.forEach(fit);
 }
