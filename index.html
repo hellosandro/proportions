@@ -371,7 +371,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     /* Key size: fits both the width and the height of the keypad area */
     --k: round(down, min(110px,
              calc((50vw - 96px) / 4.3),
-             calc((66.67svh - 48px) / 4.3)), 1px);
+             calc((66.67svh - 48px) / 4.3),
+             calc((100svh - 96px) / 5.4)), 1px);
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 2fr 4fr;
@@ -419,6 +420,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     --keys-left: round(down, calc((50vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     grid-column: 2;
     grid-row: 2;
+    align-self: end;
     align-content: start;
     padding-bottom: 48px;
   }
@@ -813,7 +815,7 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   /* as wide as the two proportion columns */
   --w: min(596px, calc(100vw - 32px));
   grid-template-columns: var(--w);
-  row-gap: calc(var(--k) * 0.06);
+  row-gap: 0;
 }
 body.calc, body.calc .top { background: var(--bg); }
 /* the round buttons at the top take the colors of the top row of keys */
@@ -827,18 +829,21 @@ body.calc { --icon-bg: var(--key-blue); --icon: var(--text-c); }
   background: none;
   border-radius: 0;
   color: var(--text-result);
-  font-size: calc(var(--k) * 0.95);
-  line-height: 1.15;
+  /* as on the iPhone: digits 0.56 of a key tall on the big line, 0.24 on the small one */
+  font-size: calc(var(--k) * 0.77);
+  line-height: 1;
   cursor: default;
 }
 /* the small line: the live result while typing, the calculation after = */
 .calc-grid #answer,
 .calc-grid.solved #expr {
-  font-size: calc(var(--k) * 0.45);
+  font-size: calc(var(--k) * 0.33);
+  line-height: 1.2;
   color: color-mix(in srgb, var(--text-result) 55%, transparent);
 }
 .calc-grid.solved #answer {
-  font-size: calc(var(--k) * 0.95);
+  font-size: calc(var(--k) * 0.77);
+  line-height: 1;
   color: var(--text-result);
   cursor: pointer;
 }
@@ -892,31 +897,19 @@ body.rows .key[data-row="0"] { background: var(--row0); }
 body.rows .key.op { background: var(--row-eq); }
 body.rows .key.op.selected { background: var(--row-text); color: var(--row-eq); }
 
-/* Key size with five rows: badge row (28px + k/2) + two pills (2k + 24px) +
-   24px + keypad (5 keys + 4 gaps = 5.4k, + 48px) = 7.9k + 124px */
-body.calc {
-  --k: round(down, min(100px,
-                       calc((100vw - 32px) / 4.3),
-                       calc((100svh - 124px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 7.9)), 1px);
-}
+/* Same keys in both modes: the key size does not change, and the keypad sits
+   on the bottom edge, so the digit rows stay exactly where they are and the
+   calculator just adds its top row (⌫ DEL %). The extra row (k + gap) comes
+   out of the room of the proportion fields (2k + 24px): what is left for the
+   calculation, 0.9k + 24px, holds the big line (0.77k) and the small one. */
 @media (max-width: 899px) {
   .calc-grid { --w: calc(4 * var(--k) + 3 * var(--gap)); }
-  body.calc .result { height: calc(5 * var(--k) + 4 * var(--gap) + 48px + env(safe-area-inset-bottom)); }
-  /* with the color bar open: 7.4k + 112px + bar */
-  body.calc.tuning {
-    --k: round(down, min(100px,
-                         calc((100vw - 32px) / 4.3),
-                         calc((100svh - 112px - var(--tuner-h) - env(safe-area-inset-top) - env(safe-area-inset-bottom)) / 7.4)), 1px);
-  }
 }
 @media (min-width: 900px) {
   .calc-grid { --w: min(596px, calc(50vw - 64px)); }
-  /* 5 keys + 4 gaps = 5.4 keys, plus 24px above and 48px below */
-  body.calc {
-    --k: round(down, min(110px,
-             calc((50vw - 96px) / 4.3),
-             calc((66.67svh - 72px) / 5.4)), 1px);
-  }
+  /* the calculator keypad may use the whole right half (it has no big result
+     in its place) */
+  .calc-keys { grid-row: 1 / span 2; }
 }
 </style>
 </head>
