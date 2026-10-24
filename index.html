@@ -434,7 +434,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
 }
 
 /* SETTINGS: button in the top-left corner of the fields area, panel as a sheet */
-.settings-btn, .palette-btn, .mode-btn {
+.settings-btn, .palette-btn {
   position: absolute;
   top: calc(16px + env(safe-area-inset-top));
   left: 16px;
@@ -450,21 +450,10 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   cursor: pointer;
 }
 .palette-btn { left: calc(16px + var(--k) / 2 + 8px); }   /* right next to settings */
-.settings-btn svg, .palette-btn svg, .mode-btn svg { width: 55%; height: 55%; }
-.settings-btn:active, .palette-btn:active, .mode-btn:active { opacity: 0.6; }
-.settings-btn:focus, .palette-btn:focus, .mode-btn:focus { outline: none; }
-.settings-btn:focus-visible, .palette-btn:focus-visible, .mode-btn:focus-visible { outline: 1.5px solid currentColor; }
-/* MODE: button in the top-right corner (proportion or calculator), as on the
-   iPhone calculator. Phones: lined up with the right edge of the keypad */
-.mode-btn { position: fixed; z-index: 3; left: auto; right: 16px; }
-@media (max-width: 899px) {
-  .mode-btn {
-    right: auto;
-    left: calc(round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px) + 3.5 * var(--k) + 3 * var(--gap));
-  }
-}
-.mode-btn .icon-calc, body.calc .mode-btn .icon-prop { display: none; }
-body.calc .mode-btn .icon-calc { display: block; }
+.settings-btn svg, .palette-btn svg { width: 55%; height: 55%; }
+.settings-btn:active, .palette-btn:active { opacity: 0.6; }
+.settings-btn:focus, .palette-btn:focus { outline: none; }
+.settings-btn:focus-visible, .palette-btn:focus-visible { outline: 1.5px solid currentColor; }
 
 .settings {
   position: fixed;
@@ -631,17 +620,27 @@ body.calc .mode-btn .icon-calc { display: block; }
   cursor: pointer;
 }
 .switch-row small { display: block; font-size: 13px; opacity: 0.55; }
-/* the chosen mode gets a check where the toggle would be */
-.mode-row[aria-checked="true"]::after {
-  content: "";
-  flex: none;
-  width: 6px;
-  height: 12px;
-  margin-right: 8px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: translateY(-2px) rotate(45deg);
+/* MODE: proportion or calculator, two buttons side by side at the top of the
+   settings; the chosen one is dark */
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
 }
+.mode-switch button {
+  padding: 14px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #F4F4F4;
+  color: #111;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 300;
+  cursor: pointer;
+}
+.mode-switch button[aria-checked="true"] { background: #111; color: #FFF; }
+.mode-switch button:active { opacity: 0.7; }
 /* iOS-style toggle */
 .switch {
   flex: none;
@@ -786,7 +785,7 @@ body.calc .mode-btn .icon-calc { display: block; }
 /* While the bar is open, phones give it room: the fields area starts lower and
    the keys shrink to fit the remaining height */
 body.tuning { --tuner-h: 108px; }
-body.tuning .settings-btn, body.tuning .palette-btn, body.tuning .mode-btn { visibility: hidden; }
+body.tuning .settings-btn, body.tuning .palette-btn { visibility: hidden; }
 @media (max-width: 899px) {
   /* the bar takes the badge's place: bar + 16px + two fields (2k + 24px) +
      24px + keypad (4.3k + 48px) = 6.3k + 112px + bar */
@@ -962,25 +961,6 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
     <div class="field" id="answer"></div>
   </div>
 </div>
-
-<!-- MODE: proportion or calculator -->
-<button class="mode-btn" id="modeBtn" type="button" aria-label="Mode">
-  <svg class="icon-prop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-    <line x1="3" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="21" y2="12"/>
-    <line x1="10.5" y1="10.5" x2="13.5" y2="10.5"/><line x1="10.5" y1="13.5" x2="13.5" y2="13.5"/>
-    <circle cx="6" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="7" r="1.6" fill="currentColor" stroke="none"/>
-    <circle cx="6" cy="17" r="1.6" fill="currentColor" stroke="none"/><circle cx="18" cy="17" r="1.6" fill="currentColor" stroke="none"/>
-  </svg>
-  <svg class="icon-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-    <rect x="5" y="2.5" width="14" height="19" rx="3"/><line x1="8.5" y1="7" x2="15.5" y2="7"/>
-    <g fill="currentColor" stroke="none">
-      <circle cx="9" cy="11.5" r="1"/><circle cx="12" cy="11.5" r="1"/><circle cx="15" cy="11.5" r="1"/>
-      <circle cx="9" cy="14.5" r="1"/><circle cx="12" cy="14.5" r="1"/><circle cx="15" cy="14.5" r="1"/>
-      <circle cx="9" cy="17.5" r="1"/><circle cx="12" cy="17.5" r="1"/><circle cx="15" cy="17.5" r="1"/>
-    </g>
-  </svg>
-</button>
-
 <!-- RESULT -->
 <div class="result" id="result"></div>
 
@@ -1045,22 +1025,6 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
   </div>
 </div>
 
-<!-- MODE SHEET -->
-<div class="settings" id="modes" aria-hidden="true">
-  <div class="settings-card" role="dialog" aria-labelledby="modesTitle">
-    <div class="settings-head">
-      <h2 id="modesTitle">Mode</h2>
-      <button class="settings-close" id="modesClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="3" y1="3" x2="21" y2="21"/><line x1="21" y1="3" x2="3" y2="21"/></svg></button>
-    </div>
-    <button class="switch-row mode-row" data-mode="proportion" type="button" role="radio" aria-checked="true">
-      <span>Proportion<small>a : b = c : x</small></span>
-    </button>
-    <button class="switch-row mode-row" data-mode="calc" type="button" role="radio" aria-checked="false">
-      <span>Calculator<small>12 × 3 + 4</small></span>
-    </button>
-  </div>
-</div>
-
 <!-- SETTINGS -->
 <div class="settings" id="settings" aria-hidden="true">
   <div class="settings-card" role="dialog" aria-label="Settings">
@@ -1072,6 +1036,10 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
     <button class="theme theme-picker" id="themePicker" type="button" aria-expanded="false"></button>
     <div class="themes" id="themes"></div>
     <div class="settings-more">
+    <div class="mode-switch" role="radiogroup" aria-label="Mode">
+      <button type="button" role="radio" data-mode="proportion" aria-checked="true">Proportion</button>
+      <button type="button" role="radio" data-mode="calc" aria-checked="false">Calculator</button>
+    </div>
     <button class="switch-row" id="liveSwitch" type="button" role="switch" aria-checked="true">
       <span>Live result<small>Shows the result as you type</small></span>
       <span class="switch" aria-hidden="true"></span>
@@ -1612,11 +1580,10 @@ function calcKeydown(e){
   e.preventDefault();
 }
 
-// MODE — proportion or calculator, chosen with the button at the top right
-// and remembered on this device
+// MODE — proportion or calculator, chosen at the top of the settings and
+// remembered on this device
 let calcMode = false;
 try { calcMode = localStorage.getItem('proportions-tool') === 'calc'; } catch(e) {}
-const modesPanel = document.getElementById('modes');
 // the browser bar takes the color of the top of the screen
 function updateBarColor(){
   const v = getComputedStyle(document.documentElement).getPropertyValue('--bg-fields').trim();
@@ -1627,24 +1594,10 @@ function setTool(calc){
   try { localStorage.setItem('proportions-tool', calc ? 'calc' : 'proportion'); } catch(e) {}
   document.body.classList.toggle('calc', calc);
   hideResult();
-  document.querySelectorAll('.mode-row').forEach(r=> r.setAttribute('aria-checked', (r.dataset.mode === 'calc') === calc));
+  document.querySelectorAll('.mode-switch button').forEach(b=> b.setAttribute('aria-checked', (b.dataset.mode === 'calc') === calc));
   allFields.forEach(fit);
 }
-function openModes(){
-  modesPanel.classList.add('open');
-  modesPanel.setAttribute('aria-hidden','false');
-}
-function closeModes(){
-  modesPanel.classList.remove('open');
-  modesPanel.setAttribute('aria-hidden','true');
-}
-document.getElementById('modeBtn').addEventListener('click', openModes);
-document.getElementById('modesClose').addEventListener('click', closeModes);
-modesPanel.addEventListener('click', e=>{ if(e.target===modesPanel) closeModes(); });
-document.querySelectorAll('.mode-row').forEach(r=> r.addEventListener('click', ()=>{
-  setTool(r.dataset.mode === 'calc');
-  closeModes();
-}));
+document.querySelectorAll('.mode-switch button').forEach(b=> b.addEventListener('click', ()=> setTool(b.dataset.mode === 'calc')));
 setTool(calcMode);
 
 // DESKTOP KEYBOARD INPUT
@@ -1658,10 +1611,6 @@ document.addEventListener('keydown', e=>{
   }
   if(document.getElementById('settings').classList.contains('open')){
     if(e.key==="Escape") closeSettings();
-    return;
-  }
-  if(modesPanel.classList.contains('open')){
-    if(e.key==="Escape") closeModes();
     return;
   }
   if(calcMode){ calcKeydown(e); return; }
@@ -1921,7 +1870,7 @@ function tunerTarget(el){
     return field.classList.contains('active') ? 'active' : 'idle';
   }
   if(el.closest('.bar, .equal-top')) return 'bars';
-  if(el.closest('.settings-btn, .palette-btn, .mode-btn')) return 'badge';
+  if(el.closest('.settings-btn, .palette-btn')) return 'badge';
   if(el.closest('#result')) return 'result';
   if(el.closest('.top')) return 'fields-bg';
   return 'kbd-bg';
