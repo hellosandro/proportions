@@ -919,8 +919,9 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
    calculation, 0.9k + 24px, holds the big line (0.77k) and the small one. */
 @media (max-width: 899px) {
   .calc-grid { --w: calc(4 * var(--k) + 3 * var(--gap)); }
-  /* the big line sits close to the keypad (the 28px run under its rounded top) */
-  body.calc .top { padding-bottom: 28px; }
+  /* the big line sits close to the keypad, 16px above its rounded top
+     (the 28px run under it) */
+  body.calc .top { padding-bottom: calc(16px + 28px); }
 }
 @media (min-width: 900px) {
   .calc-grid { --w: min(596px, calc(50vw - 64px)); }
