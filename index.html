@@ -1377,7 +1377,7 @@ function updateLive(){
   fields.forEach((f,j)=>{
     const wasX = f.classList.contains('unknown') || f.classList.contains('computed');
     f.classList.remove('computed', 'unknown');
-    if(j===i && ready && (liveMode || solved) && isFinite(lastResult)){
+    if(j===i && ready && liveMode && isFinite(lastResult)){
       f.classList.add('computed');
       f.innerText = formatNumber(lastResult);
     } else if(j===i && ready){
@@ -1389,15 +1389,15 @@ function updateLive(){
   });
 }
 
-// = : the result appears in the unknown field, in the = key's colors (as
-// with the live result); the keypad stays, as in calculator mode
+// = : calculate and show the result in place of the keypad
 function calculate(){
   // with three numbers in, the unknown is the fourth field, even if you are in it
   const v = [...fields].map(num);
   if(v.filter(x=>!isNaN(x)).length === 3) liveIndex = v.findIndex(x=>isNaN(x));
-  solved = true;
   updateLive();
-  if(!isFinite(lastResult)) solved = false;
+  if(!isFinite(lastResult)) return;
+  solved = true;
+  showResult(formatNumber(lastResult));
 }
 
 function setMode(live){
