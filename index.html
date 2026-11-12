@@ -643,6 +643,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   transition: transform 0.18s ease-out;
 }
 .theme-picker[aria-expanded="true"]::after { transform: translateY(2px) rotate(-135deg); }
+/* Live result is for the proportion only: hidden in calculator mode */
+body.calc #liveSwitch { display: none; }
 .switch-row {
   width: 100%;
   display: flex;
