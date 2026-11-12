@@ -448,9 +448,9 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   }
   /* Desktop is lighter: no field backgrounds, just the numbers on the fields'
      background, split by a thin cross in the color of the old bars and =
-     (across: the fraction bars; down: the two sides of the =). The field you
-     are in is in full color, the others a little softer; the result is in
-     the = key's color (or the
+     (across: the fraction bars; down: the two sides of the =). Only the
+     field you type in keeps its pane, as before; the result is in the = key's
+     color (or the
      theme's --field-result where that color is too faint on the fields). */
   .grid .field,
   .grid .field.active,
@@ -461,7 +461,27 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   }
   .grid .field.computed { color: var(--field-result, var(--equal-active)); }
   body.rows .grid .field.computed { background: none; color: var(--field-result, var(--row-eq)); }
-  .grid .field:not(.active):not(.computed) { color: color-mix(in srgb, var(--equal) 60%, transparent); }
+  /* the pane is drawn a few pixels inside the field, clear of the cross */
+  .grid .field.active {
+    position: relative;
+    isolation: isolate;
+    color: var(--text-active);
+  }
+  .grid .field.active::after {
+    display: block;
+    content: "";
+    position: absolute;
+    inset: 8px;
+    z-index: -1;
+    width: auto;
+    height: auto;
+    margin: 0;
+    opacity: 1;
+    animation: none;
+    border-radius: inherit;
+    background: var(--field-active);
+    box-shadow: inset 0 0 0 1.5px var(--field-active-border, transparent);
+  }
   .grid .field.unknown { color: color-mix(in srgb, var(--equal) 50%, transparent); }
   .grid::before,
   .grid::after {
