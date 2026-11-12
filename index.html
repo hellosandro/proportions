@@ -899,6 +899,9 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
   color: var(--equal);
   cursor: pointer;
 }
+/* the operator waiting for its number, at the left of the big line */
+.calc-grid .op-sign { margin-right: auto; padding-right: 0.3em; }
+.calc-grid .op-sign:empty { display: none; }
 /* Blinking caret where you type */
 .calc-grid .caret::after {
   content: "";
@@ -1008,7 +1011,7 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
     <div class="equal-top">=</div>
   </div>
   <div class="calc-grid">
-    <div class="field caret" id="expr"><span class="text" id="exprText"></span></div>
+    <div class="field caret" id="expr"><span class="op-sign" id="exprOp"></span><span class="text" id="exprText"></span></div>
     <div class="field" id="answer"></div>
   </div>
 </div>
@@ -1141,6 +1144,7 @@ const keyboard = document.getElementById('keyboard');
 const calcKeyboard = document.getElementById('calcKeyboard');
 const exprField = document.getElementById('expr');
 const exprText = document.getElementById('exprText');
+const exprOp = document.getElementById('exprOp');
 const answerField = document.getElementById('answer');
 const allFields = [...fields, exprField, answerField];
 const resultBox = document.getElementById('result');
@@ -1154,16 +1158,22 @@ function fit(f){
   f.classList.remove('overflow');
   const cs = getComputedStyle(f);
   const room = f.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  // the width of what is written (the operator waiting at the left of the
+  // calculator's big line counts with its own spacing, not the gap before the number)
   const range = document.createRange();
-  range.selectNodeContents(f);
+  const width = ()=>{
+    if(f !== exprField) { range.selectNodeContents(f); return range.getBoundingClientRect().width; }
+    range.selectNodeContents(exprText);
+    return range.getBoundingClientRect().width + (exprOp.innerText ? exprOp.getBoundingClientRect().width : 0);
+  };
   let size = parseFloat(cs.fontSize);
   const min = f === exprField ? Math.min(size, 24) : 12;
   // the caret adds about 0.1em after the number in the active field
-  while(range.getBoundingClientRect().width + size * 0.1 > room && size > min){
+  while(width() + size * 0.1 > room && size > min){
     size -= 2;
     f.style.fontSize = size + "px";
   }
-  if(range.getBoundingClientRect().width + size * 0.1 > room) f.classList.add('overflow');
+  if(width() + size * 0.1 > room) f.classList.add('overflow');
 }
 
 allFields.forEach(f=>{
@@ -1607,17 +1617,30 @@ function calcHandleKey(k){
   calcUpdate();
 }
 
-// Shows the calculation big (0 when empty) and the live result small below it;
-// after = the result is big and the calculation small, above it
+// The big line holds the number you are typing. Once you press an operator,
+// the number before it goes up to the small line and the operator waits at the
+// left of the big line, which is free for the next number: 59, + → "59" small,
+// "+" big on the left; 2 → "+ … 2". After = the result is big and the whole
+// calculation small, above it.
 function calcUpdate(){
-  exprText.innerText = tokens.length ? tokens.map(showToken).join('') : '0';
   calcResult = hasOperation(tokens) ? tidy(evaluate(tokens)) : NaN;
+  const opAt = tokens.findIndex(isOp);   // operators confirm, so there is at most one
 
   exprField.parentElement.classList.toggle('solved', calcSolved);
   exprField.classList.toggle('caret', !calcSolved);
-  if(isFinite(calcResult) && calcSolved) answerField.innerText = calcFormat.format(calcResult);
-  else if(isFinite(calcResult) && liveMode) answerField.innerText = '=\u2009' + calcFormat.format(calcResult);
-  else answerField.innerText = '';
+  if(calcSolved){
+    exprOp.innerText = '';
+    exprText.innerText = tokens.map(showToken).join('');
+    answerField.innerText = calcFormat.format(calcResult);
+  } else if(opAt >= 0){
+    exprOp.innerText = tokens[opAt];
+    exprText.innerText = tokens.slice(opAt + 1).map(showToken).join('');
+    answerField.innerText = tokens.slice(0, opAt).map(showToken).join('');
+  } else {
+    exprOp.innerText = '';
+    exprText.innerText = tokens.length ? tokens.map(showToken).join('') : '0';
+    answerField.innerText = '';
+  }
   // the sizes swap with the class, so measure again
   fit(exprField);
   fit(answerField);
