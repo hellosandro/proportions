@@ -458,10 +458,11 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   .keyboard {
     --keys-left: round(down, calc((50vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
     grid-column: 2;
-    grid-row: 2;
-    align-self: end;
+    /* centered in height in the right half, like the fields on the left */
+    grid-row: 1 / span 2;
+    align-self: center;
     align-content: start;
-    padding-bottom: 48px;
+    padding-bottom: 24px;
   }
 
   .keyboard.hide {
@@ -965,9 +966,6 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
 }
 @media (min-width: 900px) {
   .calc-grid { --w: min(596px, calc(50vw - 64px)); }
-  /* the calculator keypad may use the whole right half (it has no big result
-     in its place) */
-  .calc-keys { grid-row: 1 / span 2; }
 }
 </style>
 </head>
