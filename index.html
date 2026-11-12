@@ -626,8 +626,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
    light tint of its own */
 .mode-switch {
   display: grid;
-  grid-template-columns: repeat(2, 132px);
-  gap: 16px;
+  grid-template-columns: 1fr 1fr;   /* half the sheet each */
+  gap: 12px;
   margin-bottom: 20px;
 }
 .mode-switch button {
@@ -1395,10 +1395,11 @@ function clearAll(){
   updateLive();
 }
 
-// CALCULATOR MODE — the same app as a calculator. The calculation is a list of
-// numbers and operators, e.g. ['12', '×', '3', '+', '4']. Numbers are kept as
+// CALCULATOR MODE — the same app as a basic calculator. The calculation is a
+// list of numbers and operators, e.g. ['12', '×', '3']. Numbers are kept as
 // typed, with "." and "-" (shown with the phone's decimal separator and a true
-// minus sign). × and ÷ come before + and −, as on paper.
+// minus sign). Each operator confirms the operation before it, as on a pocket
+// calculator: 7 + 15 × gives 22 ×, so there is one operation at a time.
 const calcFormat = new Intl.NumberFormat(navigator.language || 'en', {maximumFractionDigits:10, useGrouping:false, numberingSystem:'latn'});
 const OPS = ['+', '−', '×', '÷'];
 const isOp = t => OPS.includes(t);
@@ -1415,15 +1416,16 @@ function evaluate(t){
   t = t.slice();
   while(t.length && isOp(t[t.length-1])) t.pop();
   if(!t.length) return NaN;
-  // first × and ÷, then + and −
-  const terms = [parseFloat(t[0])], signs = [];
+  // left to right, as on a pocket calculator
+  let r = parseFloat(t[0]);
   for(let i=1; i<t.length; i+=2){
     const op = t[i], n = parseFloat(t[i+1]);
-    if(op==='×') terms[terms.length-1] *= n;
-    else if(op==='÷') terms[terms.length-1] /= n;
-    else { signs.push(op); terms.push(n); }
+    if(op==='+') r += n;
+    else if(op==='−') r -= n;
+    else if(op==='×') r *= n;
+    else r /= n;
   }
-  return signs.reduce((r, op, j)=> op==='+' ? r + terms[j+1] : r - terms[j+1], terms[0]);
+  return r;
 }
 
 // a calculation has a result once it has at least one operation: 12 × 3
@@ -1486,8 +1488,15 @@ function typeOp(op){
   // a number still waiting for its digits ("-") gives way to the operator
   if(lastIsNumber() && isNaN(parseFloat(lastToken()))) tokens.pop();
   if(!tokens.length) tokens.push('0');
-  if(isOp(lastToken())) tokens[tokens.length-1] = op;
-  else tokens.push(op);
+  if(isOp(lastToken())){ tokens[tokens.length-1] = op; return; }
+  // the operator confirms the operation before it: 7 + 15 × → 22 ×
+  // (one that has no result, like ÷ 0, stays as it is until you fix it)
+  if(hasOperation(tokens)){
+    const r = tidy(evaluate(tokens));
+    if(!isFinite(r)) return;
+    tokens = [numText(r)];
+  }
+  tokens.push(op);
 }
 function calcToggleSign(){
   calcGoOn();
