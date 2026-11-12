@@ -124,7 +124,16 @@ body {
   .grid {
     --col: calc(2 * var(--k) + var(--gap));
     column-gap: var(--gap);
+    row-gap: var(--gap);
   }
+  /* Phones: the four fields are one block, split by the key gap. Its outer
+     corners are rounded like the sheets (28px), the inner ones just softened;
+     no fraction bars and no = (the layout itself says a/b = c/d) */
+  .grid .bar, .grid .equal-top { display: none; }
+  #f0 { border-radius: 28px 6px 6px 6px; }   /* a: top left */
+  #f1 { border-radius: 6px 28px 6px 6px; }   /* c: top right */
+  #f2 { border-radius: 6px 6px 6px 28px; }   /* b: bottom left */
+  #f3 { border-radius: 6px 6px 28px 6px; }   /* d: bottom right */
   .top .settings-btn {
     left: round(down, calc((100vw - 4 * var(--k) - 3 * var(--gap)) / 2), 1px);
   }
