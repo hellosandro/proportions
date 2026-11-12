@@ -448,10 +448,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   }
   /* Desktop is lighter: no field backgrounds, just the numbers on the fields'
      background, split by a thin cross in the color of the old bars and =
-     (across: the fraction bars; down: the two sides of the =). Only the
-     field you type in keeps its pane, as before; the result is in the = key's
-     color (or the
-     theme's --field-result where that color is too faint on the fields). */
+     (across: the fraction bars; down: the two sides of the =). Only the field
+     you type in and the live result keep their pane, as before. */
   .grid .field,
   .grid .field.active,
   .grid .field.computed {
@@ -459,18 +457,20 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     box-shadow: none;
     color: var(--equal);
   }
-  .grid .field.computed { color: var(--field-result, var(--equal-active)); }
-  body.rows .grid .field.computed { background: none; color: var(--field-result, var(--row-eq)); }
   /* the pane fills its quarter right up to the cross (it covers the lines
      there); only its outer corner is rounded */
   .grid::after { z-index: 0; }
-  .grid .field.active {
+  .grid .field.active,
+  .grid .field.computed {
     position: relative;
     z-index: 1;
     isolation: isolate;
-    color: var(--text-active);
   }
-  .grid .field.active::after {
+  .grid .field.active { --pane: var(--field-active); --pane-border: var(--field-active-border, transparent); color: var(--text-active); }
+  .grid .field.computed { --pane: var(--equal-active); --pane-border: transparent; color: var(--text-equal); }
+  body.rows .grid .field.computed { background: none; --pane: var(--row-eq); color: var(--row-text); }
+  .grid .field.active::after,
+  .grid .field.computed::after {
     display: block;
     content: "";
     position: absolute;
@@ -483,13 +483,13 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     opacity: 1;
     animation: none;
     border-radius: 0;
-    background: var(--field-active);
-    box-shadow: inset 0 0 0 1.5px var(--field-active-border, transparent);
+    background: var(--pane);
+    box-shadow: inset 0 0 0 1.5px var(--pane-border);
   }
-  #f0.active::after { right: var(--to-cross); bottom: var(--to-cross); border-top-left-radius: 28px; }
-  #f1.active::after { left: var(--to-cross); bottom: var(--to-cross); border-top-right-radius: 28px; }
-  #f2.active::after { right: var(--to-cross); top: var(--to-cross); border-bottom-left-radius: 28px; }
-  #f3.active::after { left: var(--to-cross); top: var(--to-cross); border-bottom-right-radius: 28px; }
+  #f0.active::after, #f0.computed::after { right: var(--to-cross); bottom: var(--to-cross); border-top-left-radius: 28px; }
+  #f1.active::after, #f1.computed::after { left: var(--to-cross); bottom: var(--to-cross); border-top-right-radius: 28px; }
+  #f2.active::after, #f2.computed::after { right: var(--to-cross); top: var(--to-cross); border-bottom-left-radius: 28px; }
+  #f3.active::after, #f3.computed::after { left: var(--to-cross); top: var(--to-cross); border-bottom-right-radius: 28px; }
   .grid .field.unknown { color: color-mix(in srgb, var(--equal) 50%, transparent); }
   .grid::before,
   .grid::after {
@@ -1849,7 +1849,7 @@ const THEMES = {
     '--key-blue':'#C629FF','--key-del':'#FF6B35','--ink':'#FFFFFF','--text-active':'#4D4DFF',
     '--text-result':'#FFFFFF','--text-keys':'#FFFFFF','--text-c':'#FFFFFF','--text-del':'#FFFFFF','--text-equal':'#FFFFFF' }},
   grafite: { name: 'Graphite', calcSwap: true, colors: {
-    '--bg-fields':'#EDEDED','--result-color':'#3C3F4F','--field-result':'#3C3F4F','--equal':'#7B838E','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
+    '--bg-fields':'#EDEDED','--result-color':'#3C3F4F','--equal':'#7B838E','--icon-bg':'#3A3D4B','--icon':'#FFFFFF','--field-active':'#F7F7F7','--field-active-border':'#F7F7F7','--text-active':'#2E303C','--field-idle':'#3D3F4F','--text-idle':'#FFFFFF','--bg':'#3C3F4F','--text-result':'#FFFFFF','--key':'#F7F7F7','--text-keys':'#111111','--key-blue':'#5BB4DB','--text-c':'#FFFFFF','--key-del':'#5BB4DB','--text-del':'#FFFFFF','--equal-off':'#BFC3CC','--equal-active':'#B6D46A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   notte: { name: 'Night', colors: {
     '--bg-fields':'#141414','--equal':'#8E8E93','--icon-bg':'#2C2C2E','--icon':'#FFFFFF','--field-active':'#A5A5A5','--field-active-border':'#A5A5A5','--text-active':'#000000','--field-idle':'#242424','--text-idle':'#FFFFFF','--bg':'#000000','--text-result':'#FFFFFF','--key':'#333333','--text-keys':'#FFFFFF','--key-blue':'#A5A5A5','--text-c':'#000000','--key-del':'#A5A5A5','--text-del':'#000000','--equal-off':'#5A3A0E','--equal-active':'#FF9F0A','--text-equal':'#FFFFFF','--text-fields':'#FFFFFF','--ink':'#FFFFFF' }},
   carta: { name: 'Paper', colors: {
@@ -1878,7 +1878,6 @@ function applyTheme(id){
   currentTheme = THEMES[id] ? id : 'pop';
   // optional colors: a theme without them falls back to the default
   document.documentElement.style.removeProperty('--result-color');
-  document.documentElement.style.removeProperty('--field-result');
   Object.entries(theme.colors).forEach(([v,c])=> document.documentElement.style.setProperty(v, c));
   document.body.classList.toggle('rows', !!theme.rows);
   document.body.classList.toggle('calc-swap', !!theme.calcSwap);
