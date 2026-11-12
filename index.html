@@ -269,6 +269,21 @@ body.rows .result { color: var(--result-color, var(--row-eq)); }
   transform: translateY(0);
 }
 
+/* Phones: whatever shows around the page (under the status bar, below the
+   keypad, when the page bounces) continues the colors next to it: the fields'
+   color at the top, the keypad's at the bottom (the fields' with the result
+   showing). Panels that slid away are hidden, so they never peek out there. */
+@media (max-width: 899px) {
+  /* a tile twice the page's height, centered: it reaches half a page above
+     and below the page, fields' color up to the middle, keypad's below */
+  html { background: linear-gradient(var(--bg-fields) 50%, var(--bg) 50%) center / 100% 200%; }
+  html:has(.result.show), body:has(.result.show) { background: var(--bg-fields); }
+  .result { visibility: hidden; transition: transform 0.18s ease-out, visibility 0s 0.18s; }
+  .result.show { visibility: visible; transition: transform 0.18s ease-out; }
+  .keyboard { transition: transform 0.18s ease-out; }
+  .keyboard.hide { visibility: hidden; transition: transform 0.18s ease-out, visibility 0s 0.18s; }
+}
+
 /* Phones: the keypad area has the sheets' rounded top corners */
 @media (max-width: 899px) {
   .keyboard {
