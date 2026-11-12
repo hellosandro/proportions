@@ -904,20 +904,6 @@ body.calc .calc-grid, body.calc .calc-keys { display: grid; }
 /* the operator waiting for its number, at the left of the big line */
 .calc-grid .op-sign { margin-right: auto; padding-right: 0.3em; }
 .calc-grid .op-sign:empty { display: none; }
-/* Blinking caret where you type */
-.calc-grid .caret::after {
-  content: "";
-  flex: none;
-  width: 2px;
-  height: 0.75em;
-  margin-left: 0.06em;
-  background: currentColor;
-  border-radius: 1px;
-  animation: caret 1.1s steps(1) infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .calc-grid .caret::after { animation: none; }
-}
 /* the top row is all one color, DEL included (row themes: see below) */
 body:not(.rows) .calc-keys .key.blue[data-action="del"] { background: var(--key-blue); color: var(--text-c); }
 /* A calculation too long even at the smallest size: show its end, where you
@@ -1013,7 +999,7 @@ body.rows .key.op.selected[data-row="3"] { color: var(--row3); }
     <div class="equal-top">=</div>
   </div>
   <div class="calc-grid">
-    <div class="field caret" id="expr"><span class="op-sign" id="exprOp"></span><span class="text" id="exprText"></span></div>
+    <div class="field" id="expr"><span class="op-sign" id="exprOp"></span><span class="text" id="exprText"></span></div>
     <div class="field" id="answer"></div>
   </div>
 </div>
@@ -1630,7 +1616,6 @@ function calcUpdate(){
   const opAt = tokens.findIndex(isOp);   // operators confirm, so there is at most one
 
   exprField.parentElement.classList.toggle('solved', calcSolved);
-  exprField.classList.toggle('caret', !calcSolved);
   if(calcSolved){
     exprOp.innerText = '';
     exprText.innerText = tokens.map(showToken).join('');
