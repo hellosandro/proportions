@@ -218,6 +218,8 @@ body.rows .field.computed {
 .grid #f2 { border-bottom-left-radius: 28px; }
 .grid #f3 { border-bottom-right-radius: 28px; }
 .grid .bar, .grid .equal-top { display: none; }
+/* no caret in the four fields: it would push the number off center */
+.grid .field.active::after { display: none; }
 
 /* FRACTION BARS */
 .bar {
@@ -447,7 +449,8 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   /* Desktop is lighter: no field backgrounds, just the numbers on the fields'
      background, split by a thin cross in the color of the old bars and =
      (across: the fraction bars; down: the two sides of the =). The field you
-     are in has the caret; the result is in the = key's color (or the
+     are in is in full color, the others a little softer; the result is in
+     the = key's color (or the
      theme's --field-result where that color is too faint on the fields). */
   .grid .field,
   .grid .field.active,
@@ -458,6 +461,7 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   }
   .grid .field.computed { color: var(--field-result, var(--equal-active)); }
   body.rows .grid .field.computed { background: none; color: var(--field-result, var(--row-eq)); }
+  .grid .field:not(.active):not(.computed) { color: color-mix(in srgb, var(--equal) 60%, transparent); }
   .grid .field.unknown { color: color-mix(in srgb, var(--equal) 50%, transparent); }
   .grid::before,
   .grid::after {
