@@ -1186,7 +1186,9 @@ function formatNumber(n){
 }
 
 // SHOW / HIDE THE RESULT (it takes the keypad's place)
+let resultShownAt = 0;
 function showResult(text){
+  resultShownAt = Date.now();
   resultBox.innerText = text;
   resultBox.classList.add('show');
   keyboard.classList.add('hide');
@@ -1211,8 +1213,12 @@ function fitResult(){
   }
 }
 
-// tapping the result brings the keypad back
-resultBox.addEventListener('click', hideResult);
+// tapping the result brings the keypad back. The "=" key acts on touch down,
+// so the result slides in under the finger: the click that comes when the
+// finger lifts must not close it again.
+resultBox.addEventListener('click', ()=>{
+  if(Date.now() - resultShownAt > 500) hideResult();
+});
 
 // ACTIVATE FIELD
 function activate(f){
