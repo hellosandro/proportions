@@ -199,6 +199,26 @@ body.rows .field.computed {
   border-radius: 999px;
 }
 
+/* PHONES: the four fields form one block, like a window with four panes.
+   The thin cross between them reads as the fraction bars (across) and the
+   equals sign (down). The block's outer corners are the sheets' 28px, the
+   inner ones nearly square. Fields are a little taller (1.1 keys): with the
+   thin gap the block takes no more height than before. */
+@media (max-width: 899px) {
+  .grid {
+    --pane-gap: round(calc(var(--gap) / 2), 1px);
+    column-gap: var(--pane-gap);
+    row-gap: var(--pane-gap);
+  }
+  .grid .field,
+  .grid .field.active { height: calc(var(--k) * 1.1); border-radius: 4px; }
+  .grid #f0 { border-top-left-radius: 28px; }
+  .grid #f1 { border-top-right-radius: 28px; }
+  .grid #f2 { border-bottom-left-radius: 28px; }
+  .grid #f3 { border-bottom-right-radius: 28px; }
+  .grid .bar, .grid .equal-top { display: none; }
+}
+
 /* FRACTION BARS */
 .bar {
   position: absolute;
