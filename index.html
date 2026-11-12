@@ -461,9 +461,12 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   }
   .grid .field.computed { color: var(--field-result, var(--equal-active)); }
   body.rows .grid .field.computed { background: none; color: var(--field-result, var(--row-eq)); }
-  /* the pane is drawn a few pixels inside the field, clear of the cross */
+  /* the pane fills its quarter right up to the cross (it covers the lines
+     there); only its outer corner is rounded */
+  .grid::after { z-index: 0; }
   .grid .field.active {
     position: relative;
+    z-index: 1;
     isolation: isolate;
     color: var(--text-active);
   }
@@ -471,17 +474,22 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
     display: block;
     content: "";
     position: absolute;
-    inset: 8px;
+    --to-cross: calc(var(--pane-gap) / -2 - 1px);
+    inset: 0;
     z-index: -1;
     width: auto;
     height: auto;
     margin: 0;
     opacity: 1;
     animation: none;
-    border-radius: inherit;
+    border-radius: 0;
     background: var(--field-active);
     box-shadow: inset 0 0 0 1.5px var(--field-active-border, transparent);
   }
+  #f0.active::after { right: var(--to-cross); bottom: var(--to-cross); border-top-left-radius: 28px; }
+  #f1.active::after { left: var(--to-cross); bottom: var(--to-cross); border-top-right-radius: 28px; }
+  #f2.active::after { right: var(--to-cross); top: var(--to-cross); border-bottom-left-radius: 28px; }
+  #f3.active::after { left: var(--to-cross); top: var(--to-cross); border-bottom-right-radius: 28px; }
   .grid .field.unknown { color: color-mix(in srgb, var(--equal) 50%, transparent); }
   .grid::before,
   .grid::after {
