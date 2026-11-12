@@ -1162,9 +1162,10 @@ function fit(f){
   // calculator's big line counts with its own spacing, not the gap before the number)
   const range = document.createRange();
   const width = ()=>{
-    if(f !== exprField) { range.selectNodeContents(f); return range.getBoundingClientRect().width; }
-    range.selectNodeContents(exprText);
-    return range.getBoundingClientRect().width + (exprOp.innerText ? exprOp.getBoundingClientRect().width : 0);
+    const op = f.querySelector('.op-sign'), text = f.querySelector('.text');
+    if(!op || !op.innerText || !text) { range.selectNodeContents(f); return range.getBoundingClientRect().width; }
+    range.selectNodeContents(text);
+    return range.getBoundingClientRect().width + op.getBoundingClientRect().width;
   };
   let size = parseFloat(cs.fontSize);
   const min = f === exprField ? Math.min(size, 24) : 12;
@@ -1620,8 +1621,8 @@ function calcHandleKey(k){
 // The big line holds the number you are typing. Once you press an operator,
 // the number before it goes up to the small line and the operator waits at the
 // left of the big line, which is free for the next number: 59, + → "59" small,
-// "+" big on the left; 2 → "+ … 2". After = the result is big and the whole
-// calculation small, above it.
+// "+" big on the left; 2 → "+ … 2". After = the result is big, with "=" at the
+// left, and the whole calculation small, above it.
 function calcUpdate(){
   calcResult = hasOperation(tokens) ? tidy(evaluate(tokens)) : NaN;
   const opAt = tokens.findIndex(isOp);   // operators confirm, so there is at most one
@@ -1631,7 +1632,9 @@ function calcUpdate(){
   if(calcSolved){
     exprOp.innerText = '';
     exprText.innerText = tokens.map(showToken).join('');
-    answerField.innerText = calcFormat.format(calcResult);
+    // the total: "=" waits at the left of the big line, like the operators
+    answerField.innerHTML = '<span class="op-sign">=</span><span class="text"></span>';
+    answerField.querySelector('.text').innerText = calcFormat.format(calcResult);
   } else if(opAt >= 0){
     exprOp.innerText = tokens[opAt];
     exprText.innerText = tokens.slice(opAt + 1).map(showToken).join('');
