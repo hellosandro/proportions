@@ -436,6 +436,13 @@ body.rows .key.blue[data-action="del"] { color: var(--row-text); }
   .grid {
     --col: min(280px, calc((50vw - 64px - 36px) / 2));
   }
+  /* the block of fields is exactly as tall as the keys (4 keys + 3 gaps), so
+     the two halves line up; the numbers follow the key size, not the window */
+  .grid .field,
+  .grid .field.active {
+    height: calc((4 * var(--k) + 3 * var(--gap) - var(--pane-gap)) / 2);
+    font-size: calc(var(--k) * 0.75);
+  }
 
   /* The result replaces the keypad, centered in the right half */
   .result {
