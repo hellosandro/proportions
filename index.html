@@ -278,6 +278,21 @@ body.rows .result { color: var(--result-color, var(--row-eq)); }
      and below the page, fields' color up to the middle, keypad's below */
   html { background: linear-gradient(var(--bg-fields) 50%, var(--bg) 50%) center / 100% 200%; }
   html:has(.result.show), body:has(.result.show) { background: var(--bg-fields); }
+  /* iOS colors the strips around the page after fixed elements touching the
+     page's top and bottom edges (otherwise after the page background): two
+     thin fixed bands, the same colors as what they sit on, set them right */
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 8px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  body::before { top: 0; background: var(--bg-fields); }
+  body::after { bottom: 0; background: var(--bg); }
+  body:has(.result.show)::after { background: var(--bg-fields); }
   .result { visibility: hidden; transition: transform 0.18s ease-out, visibility 0s 0.18s; }
   .result.show { visibility: visible; transition: transform 0.18s ease-out; }
   .keyboard { transition: transform 0.18s ease-out; }
